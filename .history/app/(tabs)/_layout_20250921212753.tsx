@@ -30,11 +30,11 @@ export default function TabsLayout() {
 
         }}>
             <Tabs
-                screenOptions={{ freezeOnBlur: true }}
-                detachInactiveScreens={false}   // optional: keep tab screens mounted
-            ></Tabs>
-            <Tabs.Screen name="home" initialParams={{ username: name }}
-
+      screenOptions={{ freezeOnBlur: true }}
+      detachInactiveScreens={false}   // optional: keep tab screens mounted
+    ></Tabs>
+            <Tabs.Screen name="home" initialParams={{ username: name}}
+                
                 options={{
                     tabBarLabel: 'Home',
                     tabBarIcon: ({ color }) => (
@@ -42,7 +42,17 @@ export default function TabsLayout() {
                     ),
                     title: 'Home',
                 }}
-            />
+                 />
+
+                 <Tabs.Screen 
+                    name="home"  initialParams={{ username: name}}
+
+                    options={{ 
+                        tabBarLabel: 'Home',
+                        tabBarIcon: ({ color }) => (
+                            <FontAwesome name='home' size={24} color={color} />
+                    ),
+                        title: 'Home' }} />
 
             <Tabs.Screen name="chats"
                 options={{
@@ -62,7 +72,7 @@ export default function TabsLayout() {
                     title: 'Sessions'
                 }} />
 
-            <Tabs.Screen name="profile" initialParams={{ username: name }}
+            <Tabs.Screen name="profile" initialParams={{ username: name}}
                 options={{
                     tabBarLabel: 'My Profile',
                     tabBarIcon: ({ color }) => (

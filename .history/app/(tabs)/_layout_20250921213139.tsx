@@ -71,7 +71,6 @@ export default function TabsLayout() {
                     title: 'Profile'
                 }} />
 
-            <Tabs.Screen name="hometabs" options={{ href: null }} />  {/* hidden tab */}
         </Tabs>
 
     );

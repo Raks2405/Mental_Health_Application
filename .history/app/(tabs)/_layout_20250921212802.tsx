@@ -44,6 +44,17 @@ export default function TabsLayout() {
                 }}
             />
 
+            <Tabs.Screen
+                name="home" initialParams={{ username: name }}
+
+                options={{
+                    tabBarLabel: 'Home',
+                    tabBarIcon: ({ color }) => (
+                        <FontAwesome name='home' size={24} color={color} />
+                    ),
+                    title: 'Home'
+                }} />
+
             <Tabs.Screen name="chats"
                 options={{
                     tabBarLabel: 'Chats',
