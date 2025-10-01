@@ -10,7 +10,7 @@ import { SessionModel, Session } from "@/src/model/Session";
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
 
 
-export default function Sessionsssss() {
+export default function Sessions() {
     const { user } = useUser();
     const [addSessions, setAddSessions] = useState(false);
 
@@ -276,8 +276,13 @@ export default function Sessionsssss() {
                 </Provider>
 
             </View>
+            //floating button to add session
+            //list of sessions with edit and delete options
+            //option to view session details
+
+
         );
-    } 
+    }
     return (
         <View style={styles.container}>
             {SessionListContent()}

@@ -10,7 +10,7 @@ import { SessionModel, Session } from "@/src/model/Session";
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
 
 
-export default function Sessionsssss() {
+export default function Sessions() {
     const { user } = useUser();
     const [addSessions, setAddSessions] = useState(false);
 
@@ -25,7 +25,8 @@ export default function Sessionsssss() {
     const fetchSessions = useCallback(async () => { //caching
         setIsLoading(true);
         try {
-            setSessionLists((await getSessionListFromFirestore()));
+            const list = await getSessionListFromFirestore();
+            setSessionLists(list);
         } catch (e) {
             Alert.alert("Fetch Error", "Could not load sessions from the database.");
         } finally {
@@ -131,12 +132,11 @@ export default function Sessionsssss() {
         }
 
         if (sessionLists.length === 0) {
-            return (
-                <View style={styles.container}>
-                    <Text>No sessions added. Please come back later</Text>
-                </View>
-            )
-        }
+            return(
+            <View style={styles.container}>
+                <Text>No sessions added. Please come back later</Text>
+            </View>
+        )} 
 
         return (
             <ScrollView >
@@ -276,8 +276,13 @@ export default function Sessionsssss() {
                 </Provider>
 
             </View>
+            //floating button to add session
+            //list of sessions with edit and delete options
+            //option to view session details
+
+
         );
-    } 
+    }
     return (
         <View style={styles.container}>
             {SessionListContent()}

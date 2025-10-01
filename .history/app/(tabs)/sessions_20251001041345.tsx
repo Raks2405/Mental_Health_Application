@@ -276,8 +276,13 @@ export default function Sessionsssss() {
                 </Provider>
 
             </View>
+            //floating button to add session
+            //list of sessions with edit and delete options
+            //option to view session details
+
+
         );
-    } 
+    } else
     return (
         <View style={styles.container}>
             {SessionListContent()}

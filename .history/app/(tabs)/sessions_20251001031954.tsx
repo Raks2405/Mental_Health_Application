@@ -1,16 +1,16 @@
 import { useUser } from "@/src/UserContext";
 import DateTimePickerIOS, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import LottieView from 'lottie-react-native';
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Image } from "react-native";
-import { FAB, Provider } from "react-native-paper";
+import { FAB, List, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
 
 import { SessionModel, Session } from "@/src/model/Session";
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
 
 
-export default function Sessionsssss() {
+export default function Sessions() {
     const { user } = useUser();
     const [addSessions, setAddSessions] = useState(false);
 
@@ -22,20 +22,15 @@ export default function Sessionsssss() {
     const [sessionLists, setSessionLists] = useState<SessionModel[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchSessions = useCallback(async () => { //caching
+    const fetchSessions = useCallback(async () => {
         setIsLoading(true);
-        try {
-            setSessionLists((await getSessionListFromFirestore()));
-        } catch (e) {
-            Alert.alert("Fetch Error", "Could not load sessions from the database.");
-        } finally {
-            setIsLoading(false);
+        try{
+            const list = await getSessionListFromFirestore();
+            setSessionLists(list);
+        }catch(e) {
+            
         }
-    }, []);
-
-    useEffect(() => {
-        fetchSessions();
-    }, [fetchSessions]);
+    })
 
     const fmt = (d: Date) =>
         d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -68,36 +63,23 @@ export default function Sessionsssss() {
     }
 
 
-    const successfulPublish = async () => {
+    const successfulPublish = () => {
         try {
-            const sessionData: Omit<Session, 'docId' | 'createdBy' | 'uid' | 'timestamp'> = {
+            const newSession = {
                 title: title,
                 description: description !== "" ? description : "No description provided",
                 date: fmt(date),
                 time: fmtTime(time),
                 location: location,
             };
-            await addSessionToFirestore(sessionData, user?.email!);
-            await fetchSessions();
-            setTimeout(() => {
-                Alert.alert("Success", "Session published successfully!");
-            }, 250);
-
+            setSessionLists(prevList => [...prevList, newSession]);
         } catch (e) {
             Alert.alert("Error", "There was an error publishing the session. Please try again.");
             return;
         }
-
-    }
-
-    const publishReset = () => {
-        setAddSessions(false);
-        successfulPublish();
-        setTitle("");
-        setDescription("");
-        setLocation("");
-        setDate(new Date());
-        setTime(new Date());
+        setTimeout(() => {
+            Alert.alert("Success", "Session published successfully!");
+        }, 250);
     }
 
     const handlePublish = () => {
@@ -110,35 +92,35 @@ export default function Sessionsssss() {
                 {
                     text: "Continue",
                     onPress: () => {
-                        publishReset();
+                        setAddSessions(false);
+                        successfulPublish();
+                        setTitle("");
+                        setDescription("");
+                        setLocation("");
+                        setDate(new Date());
+                        setTime(new Date());
                     },
                 }
 
             ])
         } else {
-            publishReset();
+            setAddSessions(false);
+            successfulPublish();
+            setTitle("");
+            setDescription("");
+            setLocation("");
+            setDate(new Date());
+            setTime(new Date());
         }
 
     }
 
-    const SessionListContent = () => {
-        if (isLoading) {
-            return (
-                <View style={styles.container}>
-                    <Text>Loading sessions...</Text>
-                </View>
-            );
-        }
-
-        if (sessionLists.length === 0) {
-            return (
-                <View style={styles.container}>
-                    <Text>No sessions added. Please come back later</Text>
-                </View>
-            )
-        }
-
-        return (
+    const SessionListContent =
+        sessionLists.length === 0 ? (
+            <View style={styles.container}>
+                <Text>No sessions added. Please come back later</Text>
+            </View>
+        ) : (
             <ScrollView >
                 {
                     sessionLists.map((sessions, index) => (
@@ -152,7 +134,6 @@ export default function Sessionsssss() {
                     ))}
             </ScrollView>
         );
-    }
 
 
     if (user?.email === 'Guest') {
@@ -169,7 +150,7 @@ export default function Sessionsssss() {
     if (user?.email === 'Admin') {
         return (
             <View style={{ flex: 1 }}>
-                {SessionListContent()} {/* Adding sessions list content */}
+                {SessionListContent} {/* Adding sessions list content */}
                 <Provider>
                     <View style={{ flex: 1, }}>
                         {/* content here */}
@@ -248,7 +229,12 @@ export default function Sessionsssss() {
                                                 {
                                                     text: "No",
                                                     onPress: () => {
-                                                        publishReset();
+                                                        setAddSessions(false)
+                                                        setTitle("");
+                                                        setDescription("");
+                                                        setLocation("");
+                                                        setDate(new Date());
+                                                        setTime(new Date());
                                                     }
                                                 },
                                                 {
@@ -276,11 +262,16 @@ export default function Sessionsssss() {
                 </Provider>
 
             </View>
+            //floating button to add session
+            //list of sessions with edit and delete options
+            //option to view session details
+
+
         );
-    } 
+    }
     return (
         <View style={styles.container}>
-            {SessionListContent()}
+            {SessionListContent}
             <Text>Sessions Screen</Text>
         </View>
     );
