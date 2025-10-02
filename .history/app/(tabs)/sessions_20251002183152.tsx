@@ -27,23 +27,16 @@ export default function Sessionsssss() {
         try {
             const list = await getSessionListFromFirestore();
             setSessionLists(list);
-        } catch (err) {
+        } catch (e) {
             Alert.alert("Fetch Error", "Could not load sessions from the database.");
-            console.error("Session fetch error", err);
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        if(user && user.email !== 'Guest') {
-            fetchSessions();
-        }
-        else{
-            setSessionLists([]);
-        }
-        
-    }, [fetchSessions, user?.email]);
+        fetchSessions();
+    }, [fetchSessions]);
 
     const fmt = (d: Date) =>
         d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -95,7 +88,6 @@ export default function Sessionsssss() {
 
         } catch (error) {
             Alert.alert("Error", "There was an error publishing the session. Please try again.");
-            console.log(error)
             return;
         }
 

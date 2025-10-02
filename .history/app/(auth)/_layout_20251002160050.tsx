@@ -7,7 +7,7 @@ return(
   
   <View style = {styles.container}>
      <Slot/>
-  </View>
+    </View>
 );
 }
 

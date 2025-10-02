@@ -36,14 +36,8 @@ export default function Sessionsssss() {
     }, []);
 
     useEffect(() => {
-        if(user && user.email !== 'Guest') {
-            fetchSessions();
-        }
-        else{
-            setSessionLists([]);
-        }
-        
-    }, [fetchSessions, user?.email]);
+        fetchSessions();
+    }, [fetchSessions]);
 
     const fmt = (d: Date) =>
         d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -95,7 +89,6 @@ export default function Sessionsssss() {
 
         } catch (error) {
             Alert.alert("Error", "There was an error publishing the session. Please try again.");
-            console.log(error)
             return;
         }
 

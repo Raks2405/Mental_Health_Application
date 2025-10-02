@@ -95,7 +95,6 @@ export default function Sessionsssss() {
 
         } catch (error) {
             Alert.alert("Error", "There was an error publishing the session. Please try again.");
-            console.log(error)
             return;
         }
 

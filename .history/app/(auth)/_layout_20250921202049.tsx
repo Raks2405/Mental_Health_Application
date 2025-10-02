@@ -5,9 +5,9 @@ import {View, Text, StyleSheet, SafeAreaView} from 'react-native'
 export default function RootLayout() {
 return(
   
-  <View style = {styles.container}>
+  <SafeAreaView style = {styles.container}>
      <Slot/>
-  </View>
+    </SafeAreaView>
 );
 }
 

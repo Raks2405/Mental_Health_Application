@@ -1,16 +1,7 @@
 import { initializeApp, getApps, getApp,  } from "firebase/app";
-import { initializeAuth, getAuth } from "firebase/auth";
+import { initializeAuth, getAuth, getReactNativePersistence } from "firebase/auth";
 
-let getReactNativePersistence: (s: any) => any;
-
-// Prefer the RN entrypoint; fall back to main if needed
-try {
-  ({ getReactNativePersistence } = require("firebase/auth/react-native"));
-} catch {
-  ({ getReactNativePersistence } = require("firebase/auth"));
-}
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 // --- your config ---
 const firebaseConfig = {
