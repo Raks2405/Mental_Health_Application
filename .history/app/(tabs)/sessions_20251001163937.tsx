@@ -7,7 +7,7 @@ import { FAB, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
 
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
-import { Session } from "@/src/Session";
+import { Session, SessionModel } from "@/src/model/Session";
 
 
 export default function Sessionsssss() {
@@ -172,7 +172,7 @@ export default function Sessionsssss() {
     if (user?.email === 'Admin') {
         return (
             <View style={{ flex: 1 }}>
-                <Text>{SessionListContent()}</Text>
+                {SessionListContent()} {/* Adding sessions list content */}
                 <Provider>
                     <View style={{ flex: 1, }}>
                         {/* content here */}
@@ -283,7 +283,7 @@ export default function Sessionsssss() {
     } 
     return (
         <View style={styles.container}>
-            <Text>{SessionListContent()}</Text>
+            {SessionListContent()}
             <Text>Sessions Screen</Text>
         </View>
     );

@@ -7,7 +7,7 @@ import { FAB, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
 
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
-import { Session } from "@/src/Session";
+import { Session, SessionModel } from "@/src/model/Session";
 
 
 export default function Sessionsssss() {
@@ -70,9 +70,9 @@ export default function Sessionsssss() {
 
 
     const successfulPublish = async () => {
-        const createdByEmail = user?.email ?? 'Admin';
+        const createdByEmail = user?.email;
         try {
-            const sessionData: Omit<Session, 'docId' | 'timestamp'> = {
+            const sessionData: Omit<Session, 'docId' | 'createdBy' | 'uid' | 'timestamp'> = {
                 title: title,
                 description: description !== "" ? description : "No description provided",
                 date: fmt(date),
@@ -80,7 +80,7 @@ export default function Sessionsssss() {
                 location: location,
                 createdBy: createdByEmail,
             };
-            await addSessionToFirestore(sessionData);
+            await addSessionToFirestore();
             await fetchSessions();
             setTimeout(() => {
                 Alert.alert("Success", "Session published successfully!");
@@ -172,7 +172,7 @@ export default function Sessionsssss() {
     if (user?.email === 'Admin') {
         return (
             <View style={{ flex: 1 }}>
-                <Text>{SessionListContent()}</Text>
+                {SessionListContent()} {/* Adding sessions list content */}
                 <Provider>
                     <View style={{ flex: 1, }}>
                         {/* content here */}
@@ -283,7 +283,7 @@ export default function Sessionsssss() {
     } 
     return (
         <View style={styles.container}>
-            <Text>{SessionListContent()}</Text>
+            {SessionListContent()}
             <Text>Sessions Screen</Text>
         </View>
     );

@@ -3,15 +3,16 @@ import {
   addDoc,
   collection,
   getDocs,
-  getFirestore,
   orderBy,
   query,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
 import {app} from './firebase'
+import { initializeApp } from 'firebase/app';
 
-const db = getFirestore(app);
+const db = initializeApp(app)
+
 
 export interface Session {
   docId?: string;

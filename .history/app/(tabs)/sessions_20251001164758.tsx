@@ -7,7 +7,7 @@ import { FAB, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
 
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
-import { Session } from "@/src/Session";
+import { Session } from "@/src/model/Session";
 
 
 export default function Sessionsssss() {
