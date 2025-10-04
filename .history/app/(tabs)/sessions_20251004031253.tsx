@@ -1,13 +1,14 @@
-import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
-import { Session } from "@/src/Session";
 import { useUser } from "@/src/UserContext";
 import DateTimePickerIOS, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import LottieView from 'lottie-react-native';
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Image } from "react-native";
+import { launchImageLibrary } from 'react-native-image-picker';
 import { FAB, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
-import { FontAwesome } from "@expo/vector-icons";
+
+import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
+import { Session } from "@/src/Session";
 
 
 export default function Sessionsssss() {
@@ -21,7 +22,6 @@ export default function Sessionsssss() {
     const [time, setTime] = useState(new Date());
     const [location, setLocation] = useState("");
     const [sessionLists, setSessionLists] = useState<Session[]>([]);
-    const [selectedSession, setSelectedSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -42,7 +42,6 @@ export default function Sessionsssss() {
     useEffect(() => {
         if (user && user.email !== 'Guest') {
             fetchSessions();
-
         }
         else {
             setSessionLists([]);
@@ -84,9 +83,6 @@ export default function Sessionsssss() {
     const successfulPublish = async () => {
         const createdByEmail = user?.email ?? 'Admin';
         try {
-            const combined = new Date(date);
-            combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
-            const startMillis = combined.getTime();
             const sessionData: Omit<Session, 'docId' | 'timestamp'> = {
                 title: title,
                 description: description !== "" ? description : "No description provided",
@@ -94,7 +90,6 @@ export default function Sessionsssss() {
                 time: fmtTime(time),
                 location: location,
                 createdBy: createdByEmail,
-                startMillis,
             };
             await addSessionToFirestore(sessionData);
             await fetchSessions();
@@ -110,9 +105,9 @@ export default function Sessionsssss() {
 
     }
 
-
     const publishReset = () => {
         setAddSessions(false);
+        successfulPublish();
         setTitle("");
         setDescription("");
         setLocation("");
@@ -131,19 +126,15 @@ export default function Sessionsssss() {
                     text: "Continue",
                     onPress: () => {
                         publishReset();
-                        successfulPublish();
                     },
                 }
 
             ])
         } else {
             publishReset();
-            successfulPublish();
         }
 
     }
-    const isFuture = (s: Session) => (s.startMillis) > Date.now();
-
 
     const SessionListContent = () => {
         if (isLoading) {
@@ -154,7 +145,7 @@ export default function Sessionsssss() {
             );
         }
 
-        if (sessionLists?.length === 0) {
+        if (sessionLists.length === 0) {
             return (
                 <View style={styles.container}>
                     <Text>No sessions added. Please come back later</Text>
@@ -163,55 +154,34 @@ export default function Sessionsssss() {
         }
 
         return (
-            <>
-                <FlatList
-                    data={sessionLists}
-                    keyExtractor={(item, idx) => item.docId ?? `${item.title}-${item.date}-${idx}`}
-                    renderItem={({ item }) => {
-                        const future = isFuture(item);
-                        return (
-                            <View style={styles.subCard}>
-                                <Pressable
-                                    style={styles.row}               // <- use relative positioning
-                                    onPress={() => setSelectedSession(item)}
-                                >
-                                    <Text style={styles.title}>{item.title}</Text>
+            <ScrollView >
+                {
 
+                    sessionLists.map((sessions, index) => (
+                        <>
+                            <View style={styles.subCard}>
+                                <Pressable style={{ flexDirection: 'row'}} onPress={() => {
+                                    setViewSessions(true)
+                                }} >
                                     
-                                    {/* bottom-right status */}
-                                    <Text
-                                        style={[
-                                            styles.status,
-                                            future ? styles.statusUpcoming : styles.statusExpired,
-                                        ]}
-                                    >
-                                        {future ? 'Upcoming' : 'Expired'}
-                                    </Text>
                                 </Pressable>
                             </View>
-                        );
-                    }}
-                // if you want separators:
-                // ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-                />
-                <Modal
-                    visible={!!selectedSession}
-                    transparent
-                    animationType="slide"
-                    onRequestClose={() => setSelectedSession(null)}
-                >
-                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} style={styles.centered}>
-                        <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
-                        <View style={styles.modalCard}>
-                            <Text style={{ fontWeight: '700', fontSize: 18 }}>{selectedSession?.title}</Text>
-                            <Text>{selectedSession?.date}</Text>
-                            <Text>{selectedSession?.time}</Text>
-                            <Text>{selectedSession?.location}</Text>
-                            <Text style={{ marginTop: 8 }}>{selectedSession?.description}</Text>
-                        </View>
-                    </KeyboardAvoidingView>
-                </Modal>
-            </>
+
+                            <Modal key={index} visible={viewSessions} transparent animationType="slide" onRequestClose={() => setViewSessions(false)}>
+                                <Pressable style={styles.backdrop} onPress={() => setViewSessions(false)} />
+
+                                <View key={index}>
+                                    <Text>{sessions.title}</Text>
+                                    <Text>{sessions.date}</Text>
+                                    <Text>{sessions.time}</Text>
+                                    <Text>{sessions.location}</Text>
+                                    <Text>{sessions.description}</Text>
+                                </View>
+                            </Modal>
+
+                        </>
+                    ))}
+            </ScrollView>
         );
     }
 
@@ -230,7 +200,18 @@ export default function Sessionsssss() {
     if (user?.email === 'Admin') {
         return (
             <View style={{ flex: 1 }}>
-                {SessionListContent()}
+
+
+
+
+
+
+
+
+
+
+
+                <Text>{SessionListContent()}</Text>
                 <Provider>
                     <View style={{ flex: 1, }}>
                         {/* content here */}
@@ -310,7 +291,6 @@ export default function Sessionsssss() {
                                                     text: "No",
                                                     onPress: () => {
                                                         publishReset();
-
                                                     }
                                                 },
                                                 {
@@ -407,7 +387,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     subCard: {
-        backgroundColor: 'rgba(178, 155, 155, 1)',
+        backgroundColor: 'white',
 
         paddingTop: 5,
         paddingBottom: 5,
@@ -428,7 +408,7 @@ const styles = StyleSheet.create({
         ...Platform.select({
 
             ios: {
-                shadowOffset: { width: 2, height: 2 },
+                shadowOffSet: { width: 2, height: 2 },
                 shadowColor: '#000000ff',
                 shadowOpacity: 0.3,
                 shadowRadius: 4,
@@ -440,29 +420,6 @@ const styles = StyleSheet.create({
         })
 
     },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        position: 'relative', // <-- enables absolute child
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: 'black',
-        marginRight: 8,
-        maxWidth: '75%',
-    },
-    status: {
-        position: 'absolute',
-        right: 10,
-        bottom: 8,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    statusUpcoming: { color: 'green' },
-    statusExpired: { color: 'red' },
 
 });
 

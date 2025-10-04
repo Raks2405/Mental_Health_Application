@@ -9,8 +9,7 @@ export interface Session {
     time: string; // Formatted time string
     location: string;
     createdBy: string; // User email
-    timestamp: Date;
-    startMillis: number // JavaScript Date object
+    timestamp: Date; // JavaScript Date object
 }
 
 // Helper class for handling data consistency when talking to Firestore
@@ -23,7 +22,6 @@ export class SessionModel {
     description: string;
     createdBy: string;
     timestamp: Date;
-    startMillis: number;
 
     constructor(data: Partial<Session> & { timestamp: Date | null }) {
         this.title = data.title || '';
@@ -33,15 +31,7 @@ export class SessionModel {
         this.description = data.description || "No description provided";
         this.createdBy = data.createdBy || '';
         this.timestamp = data.timestamp || new Date();
-        const parsed =
-            Number.isFinite(data?.startMillis as number)
-                ? (data!.startMillis as number)
-                : Date.parse(`${this.date} ${this.time}`);
-
-        this.startMillis = Number.isFinite(parsed) ? parsed : 0;
-
         this.docId = data.docId || undefined;
-
     }
 
     // Method to format the object for writing to Firestore (removes docId and converts Date)
@@ -53,9 +43,7 @@ export class SessionModel {
             location: this.location,
             description: this.description,
             createdBy: this.createdBy,
-            timestamp: this.timestamp,
-            startMillis: this.startMillis,
-            // Firestore expects a Date object here, which it converts
+            timestamp: this.timestamp, // Firestore expects a Date object here, which it converts
         };
     }
 

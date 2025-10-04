@@ -33,15 +33,8 @@ export class SessionModel {
         this.description = data.description || "No description provided";
         this.createdBy = data.createdBy || '';
         this.timestamp = data.timestamp || new Date();
-        const parsed =
-            Number.isFinite(data?.startMillis as number)
-                ? (data!.startMillis as number)
-                : Date.parse(`${this.date} ${this.time}`);
-
-        this.startMillis = Number.isFinite(parsed) ? parsed : 0;
-
         this.docId = data.docId || undefined;
-
+        
     }
 
     // Method to format the object for writing to Firestore (removes docId and converts Date)
@@ -55,7 +48,7 @@ export class SessionModel {
             createdBy: this.createdBy,
             timestamp: this.timestamp,
             startMillis: this.startMillis,
-            // Firestore expects a Date object here, which it converts
+             // Firestore expects a Date object here, which it converts
         };
     }
 

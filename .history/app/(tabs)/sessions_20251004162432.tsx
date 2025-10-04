@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { FAB, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
-import { FontAwesome } from "@expo/vector-icons";
 
 
 export default function Sessionsssss() {
@@ -42,7 +41,6 @@ export default function Sessionsssss() {
     useEffect(() => {
         if (user && user.email !== 'Guest') {
             fetchSessions();
-
         }
         else {
             setSessionLists([]);
@@ -84,9 +82,6 @@ export default function Sessionsssss() {
     const successfulPublish = async () => {
         const createdByEmail = user?.email ?? 'Admin';
         try {
-            const combined = new Date(date);
-            combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
-            const startMillis = combined.getTime();
             const sessionData: Omit<Session, 'docId' | 'timestamp'> = {
                 title: title,
                 description: description !== "" ? description : "No description provided",
@@ -94,7 +89,6 @@ export default function Sessionsssss() {
                 time: fmtTime(time),
                 location: location,
                 createdBy: createdByEmail,
-                startMillis,
             };
             await addSessionToFirestore(sessionData);
             await fetchSessions();
@@ -110,9 +104,9 @@ export default function Sessionsssss() {
 
     }
 
-
     const publishReset = () => {
         setAddSessions(false);
+        successfulPublish();
         setTitle("");
         setDescription("");
         setLocation("");
@@ -131,19 +125,15 @@ export default function Sessionsssss() {
                     text: "Continue",
                     onPress: () => {
                         publishReset();
-                        successfulPublish();
                     },
                 }
 
             ])
         } else {
             publishReset();
-            successfulPublish();
         }
 
     }
-    const isFuture = (s: Session) => (s.startMillis) > Date.now();
-
 
     const SessionListContent = () => {
         if (isLoading) {
@@ -167,49 +157,32 @@ export default function Sessionsssss() {
                 <FlatList
                     data={sessionLists}
                     keyExtractor={(item, idx) => item.docId ?? `${item.title}-${item.date}-${idx}`}
-                    renderItem={({ item }) => {
-                        const future = isFuture(item);
-                        return (
-                            <View style={styles.subCard}>
-                                <Pressable
-                                    style={styles.row}               // <- use relative positioning
-                                    onPress={() => setSelectedSession(item)}
-                                >
-                                    <Text style={styles.title}>{item.title}</Text>
-
-                                    
-                                    {/* bottom-right status */}
-                                    <Text
-                                        style={[
-                                            styles.status,
-                                            future ? styles.statusUpcoming : styles.statusExpired,
-                                        ]}
-                                    >
-                                        {future ? 'Upcoming' : 'Expired'}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        );
-                    }}
+                    renderItem={({ item }) => (
+                        <View style={styles.subCard}>
+                            <Pressable style={{ flexDirection: 'column' }} onPress={() => setSelectedSession(item)}>
+                                <Text style={{ fontSize: 16, fontWeight: '500', color: 'black', margin: 10 }}>
+                                    {item.title}
+                                </Text>
+                            </Pressable>
+                        </View>
+                    )}
                 // if you want separators:
                 // ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                 />
                 <Modal
-                    visible={!!selectedSession}
+                    visible={!!setSessionLists}
                     transparent
                     animationType="slide"
                     onRequestClose={() => setSelectedSession(null)}
                 >
-                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} style={styles.centered}>
-                        <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
-                        <View style={styles.modalCard}>
-                            <Text style={{ fontWeight: '700', fontSize: 18 }}>{selectedSession?.title}</Text>
-                            <Text>{selectedSession?.date}</Text>
-                            <Text>{selectedSession?.time}</Text>
-                            <Text>{selectedSession?.location}</Text>
-                            <Text style={{ marginTop: 8 }}>{selectedSession?.description}</Text>
-                        </View>
-                    </KeyboardAvoidingView>
+                    <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
+                    <View style={styles.modalCard}>
+                        <Text style={{ fontWeight: '700', fontSize: 18 }}>{selectedSession?.title}</Text>
+                        <Text>{selectedSession?.date}</Text>
+                        <Text>{selectedSession?.time}</Text>
+                        <Text>{selectedSession?.location}</Text>
+                        <Text style={{ marginTop: 8 }}>{selectedSession?.description}</Text>
+                    </View>
                 </Modal>
             </>
         );
@@ -310,7 +283,6 @@ export default function Sessionsssss() {
                                                     text: "No",
                                                     onPress: () => {
                                                         publishReset();
-
                                                     }
                                                 },
                                                 {
@@ -440,29 +412,6 @@ const styles = StyleSheet.create({
         })
 
     },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        position: 'relative', // <-- enables absolute child
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: 'black',
-        marginRight: 8,
-        maxWidth: '75%',
-    },
-    status: {
-        position: 'absolute',
-        right: 10,
-        bottom: 8,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    statusUpcoming: { color: 'green' },
-    statusExpired: { color: 'red' },
 
 });
 

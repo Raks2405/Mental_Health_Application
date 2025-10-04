@@ -42,7 +42,6 @@ export default function Sessionsssss() {
     useEffect(() => {
         if (user && user.email !== 'Guest') {
             fetchSessions();
-
         }
         else {
             setSessionLists([]);
@@ -84,9 +83,6 @@ export default function Sessionsssss() {
     const successfulPublish = async () => {
         const createdByEmail = user?.email ?? 'Admin';
         try {
-            const combined = new Date(date);
-            combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
-            const startMillis = combined.getTime();
             const sessionData: Omit<Session, 'docId' | 'timestamp'> = {
                 title: title,
                 description: description !== "" ? description : "No description provided",
@@ -94,7 +90,6 @@ export default function Sessionsssss() {
                 time: fmtTime(time),
                 location: location,
                 createdBy: createdByEmail,
-                startMillis,
             };
             await addSessionToFirestore(sessionData);
             await fetchSessions();
@@ -110,9 +105,14 @@ export default function Sessionsssss() {
 
     }
 
-
+    const isFuture = (s: Session | null) => {
+        if (!s) return false;
+        const ms = new Date(`${s.date} ${s.time}`).getTime(); // e.g., "Oct 4, 2025 03:15 PM"
+        return !Number.isNaN(ms) && ms > Date.now();
+    };
     const publishReset = () => {
         setAddSessions(false);
+        successfulPublish();
         setTitle("");
         setDescription("");
         setLocation("");
@@ -131,19 +131,15 @@ export default function Sessionsssss() {
                     text: "Continue",
                     onPress: () => {
                         publishReset();
-                        successfulPublish();
                     },
                 }
 
             ])
         } else {
             publishReset();
-            successfulPublish();
         }
 
     }
-    const isFuture = (s: Session) => (s.startMillis) > Date.now();
-
 
     const SessionListContent = () => {
         if (isLoading) {
@@ -167,30 +163,21 @@ export default function Sessionsssss() {
                 <FlatList
                     data={sessionLists}
                     keyExtractor={(item, idx) => item.docId ?? `${item.title}-${item.date}-${idx}`}
-                    renderItem={({ item }) => {
-                        const future = isFuture(item);
-                        return (
-                            <View style={styles.subCard}>
-                                <Pressable
-                                    style={styles.row}               // <- use relative positioning
-                                    onPress={() => setSelectedSession(item)}
-                                >
-                                    <Text style={styles.title}>{item.title}</Text>
+                    renderItem={({ item }) => (
+                        <View style={styles.subCard}>
+                            <Pressable style={{ flexDirection: 'row', alignContent: 'space-between' }} onPress={() => setSelectedSession(item)}>
+                                <Text style={{ fontSize: 16, fontWeight: '500', color: 'black', margin: 10 }}>
+                                    {item.title}
+                                </Text>
 
-                                    
-                                    {/* bottom-right status */}
-                                    <Text
-                                        style={[
-                                            styles.status,
-                                            future ? styles.statusUpcoming : styles.statusExpired,
-                                        ]}
-                                    >
-                                        {future ? 'Upcoming' : 'Expired'}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        );
-                    }}
+                                {selectedSession && (isFuture (selectedSession) ? (
+                                    <Text style={{ color: 'red', fontSize: 10 }}>Expired</Text>
+                                ) : (<Text style={{ color: 'green', fontSize: 10 }}>Upcoming</Text>}
+                                <FontAwesome name='arrows-v' size={20} color={'gray'} />
+                            </Pressable>
+                        </View>
+                        
+                    )}
                 // if you want separators:
                 // ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                 />
@@ -310,7 +297,6 @@ export default function Sessionsssss() {
                                                     text: "No",
                                                     onPress: () => {
                                                         publishReset();
-
                                                     }
                                                 },
                                                 {
@@ -440,29 +426,6 @@ const styles = StyleSheet.create({
         })
 
     },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        position: 'relative', // <-- enables absolute child
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: 'black',
-        marginRight: 8,
-        maxWidth: '75%',
-    },
-    status: {
-        position: 'absolute',
-        right: 10,
-        bottom: 8,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    statusUpcoming: { color: 'green' },
-    statusExpired: { color: 'red' },
 
 });
 

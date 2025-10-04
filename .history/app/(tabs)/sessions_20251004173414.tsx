@@ -42,7 +42,7 @@ export default function Sessionsssss() {
     useEffect(() => {
         if (user && user.email !== 'Guest') {
             fetchSessions();
-
+            
         }
         else {
             setSessionLists([]);
@@ -113,6 +113,7 @@ export default function Sessionsssss() {
 
     const publishReset = () => {
         setAddSessions(false);
+        successfulPublish();
         setTitle("");
         setDescription("");
         setLocation("");
@@ -131,14 +132,12 @@ export default function Sessionsssss() {
                     text: "Continue",
                     onPress: () => {
                         publishReset();
-                        successfulPublish();
                     },
                 }
 
             ])
         } else {
             publishReset();
-            successfulPublish();
         }
 
     }
@@ -171,22 +170,14 @@ export default function Sessionsssss() {
                         const future = isFuture(item);
                         return (
                             <View style={styles.subCard}>
-                                <Pressable
-                                    style={styles.row}               // <- use relative positioning
-                                    onPress={() => setSelectedSession(item)}
-                                >
-                                    <Text style={styles.title}>{item.title}</Text>
-
-                                    
-                                    {/* bottom-right status */}
-                                    <Text
-                                        style={[
-                                            styles.status,
-                                            future ? styles.statusUpcoming : styles.statusExpired,
-                                        ]}
-                                    >
+                                <Pressable style={{ flexDirection: 'row', alignContent: 'space-between' }} onPress={() => setSelectedSession(item)}>
+                                    <Text style={{ fontSize: 16, fontWeight: '500', color: 'black', margin: 10 }}>
+                                        {item.title}
+                                    </Text>
+                                    <Text style={{ fontSize: 12, fontWeight: '600', color: future ? 'green' : 'red' }}>
                                         {future ? 'Upcoming' : 'Expired'}
                                     </Text>
+                                    <FontAwesome name='arrows-v' size={20} color={'gray'} />
                                 </Pressable>
                             </View>
                         );
@@ -310,7 +301,6 @@ export default function Sessionsssss() {
                                                     text: "No",
                                                     onPress: () => {
                                                         publishReset();
-
                                                     }
                                                 },
                                                 {
@@ -440,29 +430,6 @@ const styles = StyleSheet.create({
         })
 
     },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        position: 'relative', // <-- enables absolute child
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: 'black',
-        marginRight: 8,
-        maxWidth: '75%',
-    },
-    status: {
-        position: 'absolute',
-        right: 10,
-        bottom: 8,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    statusUpcoming: { color: 'green' },
-    statusExpired: { color: 'red' },
 
 });
 

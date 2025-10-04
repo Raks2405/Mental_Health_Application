@@ -168,29 +168,36 @@ export default function Sessionsssss() {
                     data={sessionLists}
                     keyExtractor={(item, idx) => item.docId ?? `${item.title}-${item.date}-${idx}`}
                     renderItem={({ item }) => {
-                        const future = isFuture(item);
-                        return (
-                            <View style={styles.subCard}>
-                                <Pressable
-                                    style={styles.row}               // <- use relative positioning
-                                    onPress={() => setSelectedSession(item)}
-                                >
-                                    <Text style={styles.title}>{item.title}</Text>
+  const future = isFuture(item);
+  return (
+    <View style={styles.subCard}>
+      <Pressable
+        style={styles.row}               // <- use relative positioning
+        onPress={() => setSelectedSession(item)}
+      >
+        <Text style={styles.title}>{item.title}</Text>
 
-                                    
-                                    {/* bottom-right status */}
-                                    <Text
-                                        style={[
-                                            styles.status,
-                                            future ? styles.statusUpcoming : styles.statusExpired,
-                                        ]}
-                                    >
-                                        {future ? 'Upcoming' : 'Expired'}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        );
-                    }}
+        {/* right-edge icon */}
+        <FontAwesome
+          name="arrows-v"
+          size={20}
+          color="gray"
+          style={{ marginLeft: 'auto', marginTop: 4 }}
+        />
+
+        {/* bottom-right status */}
+        <Text
+          style={[
+            styles.status,
+            future ? styles.statusUpcoming : styles.statusExpired,
+          ]}
+        >
+          {future ? 'Upcoming' : 'Expired'}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
                 // if you want separators:
                 // ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                 />

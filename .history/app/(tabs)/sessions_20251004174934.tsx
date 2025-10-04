@@ -177,7 +177,14 @@ export default function Sessionsssss() {
                                 >
                                     <Text style={styles.title}>{item.title}</Text>
 
-                                    
+                                    {/* right-edge icon */}
+                                    <FontAwesome
+                                        name="arrows-v"
+                                        size={20}
+                                        color="gray"
+                                        style={{ marginLeft: 'auto', marginTop: 4 }}
+                                    />
+
                                     {/* bottom-right status */}
                                     <Text
                                         style={[
@@ -190,7 +197,7 @@ export default function Sessionsssss() {
                                 </Pressable>
                             </View>
                         );
-                    }}
+                    }
                 // if you want separators:
                 // ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                 />

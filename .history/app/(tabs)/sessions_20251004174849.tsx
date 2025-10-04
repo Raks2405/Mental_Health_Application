@@ -171,22 +171,14 @@ export default function Sessionsssss() {
                         const future = isFuture(item);
                         return (
                             <View style={styles.subCard}>
-                                <Pressable
-                                    style={styles.row}               // <- use relative positioning
-                                    onPress={() => setSelectedSession(item)}
-                                >
-                                    <Text style={styles.title}>{item.title}</Text>
-
-                                    
-                                    {/* bottom-right status */}
-                                    <Text
-                                        style={[
-                                            styles.status,
-                                            future ? styles.statusUpcoming : styles.statusExpired,
-                                        ]}
-                                    >
+                                <Pressable style={{ flexDirection: 'row', alignContent: 'space-between' }} onPress={() => setSelectedSession(item)}>
+                                    <Text style={{ fontSize: 16, fontWeight: '500', color: 'black', margin: 10 }}>
+                                        {item.title}
+                                    </Text>
+                                    <Text style={{ fontSize: 12, fontWeight: '600', color: future ? 'green' : 'red', alignContent: 'flex-end' }}>
                                         {future ? 'Upcoming' : 'Expired'}
                                     </Text>
+                                    <FontAwesome name='arrows-v' size={20} color={'gray'} />
                                 </Pressable>
                             </View>
                         );
