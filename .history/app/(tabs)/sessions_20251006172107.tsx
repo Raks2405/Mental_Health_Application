@@ -1,13 +1,13 @@
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
 import { Session } from "@/src/Session";
 import { useUser } from "@/src/UserContext";
-import { FontAwesome } from "@expo/vector-icons";
 import DateTimePickerIOS, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import LottieView from 'lottie-react-native';
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { FAB, Provider } from "react-native-paper";
 import lock from '../../assets/animations/locked_icon.json';
+import { FontAwesome } from "@expo/vector-icons";
 
 
 export default function Sessionsssss() {
@@ -75,8 +75,8 @@ export default function Sessionsssss() {
                 setTime(currentTime);
             },
             mode: 'time',
-            display: 'clock',
-            is24Hour: false,
+            display: 'spinner',
+            is24Hour: true,
         });
     }
 
@@ -203,40 +203,20 @@ export default function Sessionsssss() {
                     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} style={styles.centered}>
                         <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
                         <View style={styles.modalCard}>
-                            {user?.email === 'Admin' ? (
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Pressable
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            backgroundColor: '#1f1fb0ff',
-                                            paddingHorizontal: 10,
-                                            paddingVertical: 6,
-                                            borderRadius: 6
-                                        }}
-                                    >
-                                        <FontAwesome name='edit' size={14} color='white' style={{ marginRight: 6 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}>Edit</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+                                    <Pressable style={{ backgroundColor: '#1f1fb0ff', margin: 3, flexDirection: 'row' }}>
+                                        <FontAwesome name='edit' size={24} color='white' margin='10' />
                                     </Pressable>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 16, alignContent: 'center' }}>Edit</Text>
                                 </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Pressable
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            backgroundColor: '#b01f1fff',
-                                            paddingHorizontal: 10,
-                                            paddingVertical: 6,
-                                            borderRadius: 6
-                                        }}
-                                    >
-                                        <FontAwesome name='trash' size={14} color='white' style={{ marginRight: 6 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}>Delete</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+                                    <Pressable style={{ backgroundColor: '#b01f1fff', margin: 3, flexDirection: 'row' }}>
+                                        <FontAwesome name='trash' size={24} color='white' margin='10' />
                                     </Pressable>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 16, alignContent: 'center'}}>Delete</Text>
                                 </View>
                             </View>
-                            ) : null}  
                             <View style={{ borderRadius: 1, padding: 5, alignItems: 'center' }}>
                                 <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12 }}>{selectedSession?.title}</Text>
                             </View>
@@ -301,12 +281,12 @@ export default function Sessionsssss() {
                                     <ScrollView
                                         automaticallyAdjustKeyboardInsets>
 
-                                        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 12, textAlign : 'center' }}>Add Session</Text>
-                                        <TextInput placeholder="Session Title" style={[styles.sessionTitle, {backgroundColor: 'white' } ]} value={title} onChangeText={setTitle} />
+                                        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 12 }}>Add Session</Text>
+                                        <TextInput placeholder="Session Title" style={styles.sessionTitle} value={title} onChangeText={setTitle} />
 
                                         {Platform.OS === 'ios' ? (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}> Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <DateTimePickerIOS
                                                     value={date}
                                                     mode='date'
@@ -315,44 +295,44 @@ export default function Sessionsssss() {
                                                         const currentDate = selectedDate || date;
                                                         setDate(currentDate);
                                                     }}
-                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff', backgroundColor: 'white' }}
+                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff' }}
                                                 />
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <DateTimePickerIOS
                                                     value={time}
                                                     mode='time'
-                                                    display='clock'
-                                                    is24Hour={false}
+                                                    display="default"
+                                                    is24Hour={true}
                                                     onChange={(event, selectedTime) => {
                                                         const currentTime = selectedTime || time;
                                                         setTime(currentTime);
                                                     }}
-                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff', backgroundColor: 'white' }}
+                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff' }}
                                                 />
 
                                             </>
                                         ) : (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidDate()}
-                                                    style={[styles.androidDate, {backgroundColor: 'white'}]}>
+                                                    style={styles.androidDate}>
 
                                                     <Text>{fmt(date)}</Text>
                                                 </Pressable>
 
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidTime()}
-                                                    style={[styles.androidDate, {backgroundColor: 'white'}]}>
+                                                    style={styles.androidDate}>
 
                                                     <Text>{fmtTime(time)}</Text>
                                                 </Pressable>
                                             </>
                                         )
                                         }
-                                        <TextInput placeholder="Location" style={[styles.sessionTitle, {backgroundColor: 'white'}]} value={location} onChangeText={setLocation} />
-                                        <TextInput placeholder="Description" style={[styles.adminSessionDescription, {backgroundColor: 'white'}]} multiline numberOfLines={12} value={description} onChangeText={setDescription} />
+                                        <TextInput placeholder="Location" style={styles.sessionTitle} value={location} onChangeText={setLocation} />
+                                        <TextInput placeholder="Description" style={styles.adminSessionDescription} multiline numberOfLines={12} value={description} onChangeText={setDescription} />
                                     </ScrollView>
                                     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
                                         <Pressable onPress={() => {
@@ -372,10 +352,10 @@ export default function Sessionsssss() {
                                                 }
                                             ])
                                         }} style={({ pressed }) => [
-                                            [styles.btn],
+                                            [styles.btn, styles.btnOutline],
                                             pressed && styles.loginBtnPressed,
                                         ]}>
-                                            <Text style={{color: '#fff'}}>Cancel</Text>
+                                            <Text>Cancel</Text>
                                         </Pressable>
                                         <View style={{ width: 12 }} />
                                         <Pressable disabled={
@@ -401,8 +381,9 @@ export default function Sessionsssss() {
         );
     }
     return (
-        <View style={{flex: 1}}>
-            {SessionListContent()}
+        <View style={styles.container}>
+            <Text>{SessionListContent()}</Text>
+            <Text>Sessions Screen</Text>
         </View>
     );
 }
@@ -491,7 +472,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     subCard: {
-        backgroundColor: 'rgba(122, 180, 205, 1)',
+        backgroundColor: 'rgba(178, 155, 155, 1)',
 
         paddingTop: 5,
         paddingBottom: 5,
@@ -506,7 +487,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         borderWidth: 1,
         borderRadius: 5,
-        borderColor: 'black',
+        borderColor: 'white',
 
         justifyContent: 'space-between',
         ...Platform.select({

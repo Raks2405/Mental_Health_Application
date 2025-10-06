@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     subCard: {
-        backgroundColor: 'rgba(122, 180, 205, 1)',
+        backgroundColor: 'rgba(178, 155, 155, 1)',
 
         paddingTop: 5,
         paddingBottom: 5,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         borderWidth: 1,
         borderRadius: 5,
-        borderColor: 'black',
+        borderColor: 'white',
 
         justifyContent: 'space-between',
         ...Platform.select({

@@ -75,8 +75,8 @@ export default function Sessionsssss() {
                 setTime(currentTime);
             },
             mode: 'time',
-            display: 'clock',
-            is24Hour: false,
+            display: 'spinner',
+            is24Hour: true,
         });
     }
 
@@ -301,12 +301,12 @@ export default function Sessionsssss() {
                                     <ScrollView
                                         automaticallyAdjustKeyboardInsets>
 
-                                        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 12, textAlign : 'center' }}>Add Session</Text>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 12 }}>Add Session</Text>
                                         <TextInput placeholder="Session Title" style={[styles.sessionTitle, {backgroundColor: 'white' } ]} value={title} onChangeText={setTitle} />
 
                                         {Platform.OS === 'ios' ? (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}> Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <DateTimePickerIOS
                                                     value={date}
                                                     mode='date'
@@ -317,7 +317,7 @@ export default function Sessionsssss() {
                                                     }}
                                                     style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff', backgroundColor: 'white' }}
                                                 />
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <DateTimePickerIOS
                                                     value={time}
                                                     mode='time'
@@ -333,7 +333,7 @@ export default function Sessionsssss() {
                                             </>
                                         ) : (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidDate()}
                                                     style={[styles.androidDate, {backgroundColor: 'white'}]}>
@@ -341,7 +341,7 @@ export default function Sessionsssss() {
                                                     <Text>{fmt(date)}</Text>
                                                 </Pressable>
 
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidTime()}
                                                     style={[styles.androidDate, {backgroundColor: 'white'}]}>
@@ -372,10 +372,10 @@ export default function Sessionsssss() {
                                                 }
                                             ])
                                         }} style={({ pressed }) => [
-                                            [styles.btn],
+                                            [styles.btn, styles.btnOutline],
                                             pressed && styles.loginBtnPressed,
                                         ]}>
-                                            <Text style={{color: '#fff'}}>Cancel</Text>
+                                            <Text>Cancel</Text>
                                         </Pressable>
                                         <View style={{ width: 12 }} />
                                         <Pressable disabled={
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     subCard: {
-        backgroundColor: 'rgba(122, 180, 205, 1)',
+        backgroundColor: 'rgba(178, 155, 155, 1)',
 
         paddingTop: 5,
         paddingBottom: 5,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         borderWidth: 1,
         borderRadius: 5,
-        borderColor: 'black',
+        borderColor: 'white',
 
         justifyContent: 'space-between',
         ...Platform.select({

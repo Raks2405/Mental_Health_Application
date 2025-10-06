@@ -1,7 +1,6 @@
 import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
 import { Session } from "@/src/Session";
 import { useUser } from "@/src/UserContext";
-import { FontAwesome } from "@expo/vector-icons";
 import DateTimePickerIOS, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import LottieView from 'lottie-react-native';
 import React, { useCallback, useEffect, useState } from "react";
@@ -75,8 +74,8 @@ export default function Sessionsssss() {
                 setTime(currentTime);
             },
             mode: 'time',
-            display: 'clock',
-            is24Hour: false,
+            display: 'spinner',
+            is24Hour: true,
         });
     }
 
@@ -203,40 +202,6 @@ export default function Sessionsssss() {
                     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} style={styles.centered}>
                         <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
                         <View style={styles.modalCard}>
-                            {user?.email === 'Admin' ? (
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Pressable
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            backgroundColor: '#1f1fb0ff',
-                                            paddingHorizontal: 10,
-                                            paddingVertical: 6,
-                                            borderRadius: 6
-                                        }}
-                                    >
-                                        <FontAwesome name='edit' size={14} color='white' style={{ marginRight: 6 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}>Edit</Text>
-                                    </Pressable>
-                                </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Pressable
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            backgroundColor: '#b01f1fff',
-                                            paddingHorizontal: 10,
-                                            paddingVertical: 6,
-                                            borderRadius: 6
-                                        }}
-                                    >
-                                        <FontAwesome name='trash' size={14} color='white' style={{ marginRight: 6 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}>Delete</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                            ) : null}  
                             <View style={{ borderRadius: 1, padding: 5, alignItems: 'center' }}>
                                 <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12 }}>{selectedSession?.title}</Text>
                             </View>
@@ -301,12 +266,12 @@ export default function Sessionsssss() {
                                     <ScrollView
                                         automaticallyAdjustKeyboardInsets>
 
-                                        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 12, textAlign : 'center' }}>Add Session</Text>
-                                        <TextInput placeholder="Session Title" style={[styles.sessionTitle, {backgroundColor: 'white' } ]} value={title} onChangeText={setTitle} />
+                                        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 12 }}>Add Session</Text>
+                                        <TextInput placeholder="Session Title" style={styles.sessionTitle} value={title} onChangeText={setTitle} />
 
                                         {Platform.OS === 'ios' ? (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}> Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <DateTimePickerIOS
                                                     value={date}
                                                     mode='date'
@@ -315,44 +280,44 @@ export default function Sessionsssss() {
                                                         const currentDate = selectedDate || date;
                                                         setDate(currentDate);
                                                     }}
-                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff', backgroundColor: 'white' }}
+                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff'  }}
                                                 />
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <DateTimePickerIOS
                                                     value={time}
                                                     mode='time'
-                                                    display='clock'
-                                                    is24Hour={false}
+                                                    display="default"
+                                                    is24Hour={true}
                                                     onChange={(event, selectedTime) => {
                                                         const currentTime = selectedTime || time;
                                                         setTime(currentTime);
                                                     }}
-                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff', backgroundColor: 'white' }}
+                                                    style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff' }}
                                                 />
 
                                             </>
                                         ) : (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidDate()}
-                                                    style={[styles.androidDate, {backgroundColor: 'white'}]}>
+                                                    style={styles.androidDate}>
 
                                                     <Text>{fmt(date)}</Text>
                                                 </Pressable>
 
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidTime()}
-                                                    style={[styles.androidDate, {backgroundColor: 'white'}]}>
+                                                    style={styles.androidDate}>
 
                                                     <Text>{fmtTime(time)}</Text>
                                                 </Pressable>
                                             </>
                                         )
                                         }
-                                        <TextInput placeholder="Location" style={[styles.sessionTitle, {backgroundColor: 'white'}]} value={location} onChangeText={setLocation} />
-                                        <TextInput placeholder="Description" style={[styles.adminSessionDescription, {backgroundColor: 'white'}]} multiline numberOfLines={12} value={description} onChangeText={setDescription} />
+                                        <TextInput placeholder="Location" style={styles.sessionTitle} value={location} onChangeText={setLocation} />
+                                        <TextInput placeholder="Description" style={styles.adminSessionDescription} multiline numberOfLines={12} value={description} onChangeText={setDescription} />
                                     </ScrollView>
                                     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
                                         <Pressable onPress={() => {
@@ -371,23 +336,19 @@ export default function Sessionsssss() {
                                                     }
                                                 }
                                             ])
-                                        }} style={({ pressed }) => [
-                                            [styles.btn],
-                                            pressed && styles.loginBtnPressed,
-                                        ]}>
-                                            <Text style={{color: '#fff'}}>Cancel</Text>
+                                        }} style={[styles.btn, styles.btnOutline]}>
+                                            <Text>Cancel</Text>
                                         </Pressable>
                                         <View style={{ width: 12 }} />
                                         <Pressable disabled={
                                             title.length === 0 || location.length === 0 || time == null || date == null ? true : false
-                                        } onPress={handlePublish}
-                                            android_ripple={{ color: "rgba(255,255,255,0.2)" }}   // Android ripple
-                                            style={({ pressed }) => [
-                                                title.length === 0 || location.length === 0 || time == null || date == null ? [styles.btn, styles.loginBtnPressed] : [styles.btn],
-                                                styles.btn,
-                                                pressed && styles.loginBtnPressed,                   // iOS/Android feedback
-                                            ]}>
-                                            <Text style={{ color: '#ffffffff' }}>Publish</Text>
+                                        } onPress={handlePublish} style={title.length === 0 || location.length === 0 || time == null || date == null ? [styles.btn, styles.btnOutline] : [styles.btn]}
+                                        android_ripple={{ color: "rgba(255,255,255,0.2)" }}   // Android ripple
+          style={({ pressed }) => [
+            styles.loginBtn,
+            pressed && styles.loginBtnPressed,                   // iOS/Android feedback
+          ]}>
+                                            <Text style={{ color: '#000000ff' }}>Publish</Text>
                                         </Pressable>
                                     </View>
 
@@ -401,8 +362,9 @@ export default function Sessionsssss() {
         );
     }
     return (
-        <View style={{flex: 1}}>
-            {SessionListContent()}
+        <View style={styles.container}>
+            <Text>{SessionListContent()}</Text>
+            <Text>Sessions Screen</Text>
         </View>
     );
 }
@@ -426,16 +388,13 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     btn: {
-        backgroundColor: '#003d53ff',
+        backgroundColor: '#0a84ff',
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderRadius: 8
     },
     btnOutline: {
         backgroundColor: '#ffffffff'
-    },
-    disabledbtn: {
-        backgroundColor: '#656565ff'
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
@@ -460,16 +419,6 @@ const styles = StyleSheet.create({
         })
 
     },
-    loginBtn: {
-        backgroundColor: "#003d53ff",
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: "center",
-    },
-    loginBtnPressed: {
-        opacity: 0.7,
-        transform: [{ scale: 0.98 }],
-    },
     centered: {
         flex: 1,
         alignItems: 'center',
@@ -491,7 +440,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     subCard: {
-        backgroundColor: 'rgba(122, 180, 205, 1)',
+        backgroundColor: 'rgba(178, 155, 155, 1)',
 
         paddingTop: 5,
         paddingBottom: 5,
@@ -506,7 +455,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         borderWidth: 1,
         borderRadius: 5,
-        borderColor: 'black',
+        borderColor: 'white',
 
         justifyContent: 'space-between',
         ...Platform.select({

@@ -306,7 +306,7 @@ export default function Sessionsssss() {
 
                                         {Platform.OS === 'ios' ? (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}> Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <DateTimePickerIOS
                                                     value={date}
                                                     mode='date'
@@ -317,7 +317,7 @@ export default function Sessionsssss() {
                                                     }}
                                                     style={{ width: '100%', marginBottom: 10, borderColor: '#000000ff', backgroundColor: 'white' }}
                                                 />
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <DateTimePickerIOS
                                                     value={time}
                                                     mode='time'
@@ -333,7 +333,7 @@ export default function Sessionsssss() {
                                             </>
                                         ) : (
                                             <>
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Date</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Date</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidDate()}
                                                     style={[styles.androidDate, {backgroundColor: 'white'}]}>
@@ -341,7 +341,7 @@ export default function Sessionsssss() {
                                                     <Text>{fmt(date)}</Text>
                                                 </Pressable>
 
-                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Select Time</Text>
+                                                <Text style={{ marginBottom: 6, fontWeight: '600' }}>Time</Text>
                                                 <Pressable
                                                     onPress={() => openAndroidTime()}
                                                     style={[styles.androidDate, {backgroundColor: 'white'}]}>
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     subCard: {
-        backgroundColor: 'rgba(122, 180, 205, 1)',
+        backgroundColor: 'rgba(178, 155, 155, 1)',
 
         paddingTop: 5,
         paddingBottom: 5,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         borderWidth: 1,
         borderRadius: 5,
-        borderColor: 'black',
+        borderColor: 'white',
 
         justifyContent: 'space-between',
         ...Platform.select({
