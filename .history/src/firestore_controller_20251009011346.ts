@@ -1,8 +1,8 @@
 // src/firestore_controller.ts
+import { updateDoc } from '@react-native-firebase/firestore';
 import {
     addDoc,
     collection,
-    deleteDoc,
     doc,
     getDocs,
     getFirestore,
@@ -10,7 +10,6 @@ import {
     query,
     serverTimestamp,
     Timestamp,
-    updateDoc
 } from 'firebase/firestore';
 import { app } from './firebase';
 
@@ -80,6 +79,5 @@ export async function editSession(docId: string, updateData: any) {
 }
 
 export async function deleteSession(docId: string) {
-    const docRef = doc(db, SESSIONS, docId);
-    await deleteDoc(docRef);
+    const docRef = doc(db, SESSIONS, )
 }

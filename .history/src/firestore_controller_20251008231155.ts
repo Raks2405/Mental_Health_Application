@@ -2,17 +2,15 @@
 import {
     addDoc,
     collection,
-    deleteDoc,
-    doc,
     getDocs,
     getFirestore,
     orderBy,
     query,
     serverTimestamp,
     Timestamp,
-    updateDoc
 } from 'firebase/firestore';
-import { app } from './firebase';
+import { app } from './firebase'
+import { updateDoc } from '@react-native-firebase/firestore';
 
 const db = getFirestore(app);
 
@@ -42,6 +40,19 @@ export async function addSessionToFirestore(
     return docRef.id;
 }
 
+export async function editSession(docId: string, updateData: Partial<Omit<Session, 'docId' | 'timestamp'>>) {
+    const docRef =  updateDoc( db, SESSIONS, docId);
+
+    const payload = {
+        ...updateData,
+        updatedAt: serverTimestamp(),
+    }
+    await updateDoc(docRef, payload);
+}
+
+export async function deleteSession() {
+
+}
 
 // READ (newest first)
 export async function getSessionListFromFirestore(): Promise<Session[]> {
@@ -66,20 +77,4 @@ export async function getSessionListFromFirestore(): Promise<Session[]> {
                     : (raw.startMillis?.toMillis?.() ?? 0),
         } as Session;
     });
-}
-
-export async function editSession(docId: string, updateData: any) {
-    const docRef = doc(db, SESSIONS, docId);
-
-    const payload = {
-        ...updateData,
-        updatedAt: serverTimestamp(),
-    };
-
-    await updateDoc(docRef as any, payload)
-}
-
-export async function deleteSession(docId: string) {
-    const docRef = doc(db, SESSIONS, docId);
-    await deleteDoc(docRef);
 }

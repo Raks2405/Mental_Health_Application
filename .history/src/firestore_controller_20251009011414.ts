@@ -1,8 +1,8 @@
 // src/firestore_controller.ts
+import { deleteDoc, updateDoc } from '@react-native-firebase/firestore';
 import {
     addDoc,
     collection,
-    deleteDoc,
     doc,
     getDocs,
     getFirestore,
@@ -10,7 +10,6 @@ import {
     query,
     serverTimestamp,
     Timestamp,
-    updateDoc
 } from 'firebase/firestore';
 import { app } from './firebase';
 

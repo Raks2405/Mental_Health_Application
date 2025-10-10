@@ -279,7 +279,6 @@ export default function Sessionsssss() {
                     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} style={styles.centered}>
                         <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
                         <View style={styles.modalCard}>
-
                             {user?.email === 'Admin' ? (
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -324,34 +323,28 @@ export default function Sessionsssss() {
                                     </View>
                                 </View>
                             ) : null}
-                            <ScrollView
-                                automaticallyAdjustKeyboardInsets>
-                                <View style={{ borderRadius: 1, padding: 5, alignItems: 'center' }}>
-                                    <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12 }}>{selectedSession?.title}</Text>
-                                </View>
-                                <View style={styles.metaRow}>
-                                    <Text style={styles.meta}>
-                                        <Text style={styles.metaLabel}>Date: </Text>
-                                        {selectedSession?.date}
-                                    </Text>
-
-                                    <View style={{ flex: 1, marginLeft: 20 }}>
-                                        <Text style={styles.meta} numberOfLines={2} ellipsizeMode="tail">
-                                            <Text style={styles.metaLabel}>Location: </Text>
-                                            {selectedSession?.location}
-                                        </Text>
-                                    </View>
-                                </View>
+                            <View style={{ borderRadius: 1, padding: 5, alignItems: 'center' }}>
+                                <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12 }}>{selectedSession?.title}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Text style={{ marginTop: 3 }}>
-                                    <Text style={{ fontWeight: 'bold' }}>Time: </Text>
-                                    {selectedSession?.time}
+                                    <Text style={{ fontWeight: 'bold' }}>Date: </Text>
+                                    {selectedSession?.date}
                                 </Text>
+                                <Text style={{ marginTop: 3 }}>
+                                    <Text style={{ fontWeight: 'bold' }}>Location: </Text>
+                                    {selectedSession?.location}
+                                </Text>
+                            </View>
+                            <Text style={{ marginTop: 3 }}>
+                                <Text style={{ fontWeight: 'bold' }}>Time: </Text>
+                                {selectedSession?.time}
+                            </Text>
 
-                                <Text style={{ marginTop: 10 }}>
-                                    <Text style={{ fontWeight: 'bold' }}>Description: </Text>
-                                    {selectedSession?.description}
-                                </Text>
-                            </ScrollView>
+                            <Text style={{ marginTop: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>Description: </Text>
+                                {selectedSession?.description}
+                            </Text>
                         </View>
                     </KeyboardAvoidingView>
                 </Modal>
@@ -659,17 +652,6 @@ const styles = StyleSheet.create({
         bottom: 8,
         fontSize: 12,
         fontWeight: '600',
-    },
-    metaRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    meta: {
-        fontSize: 14,
-        color: 'black',
-    },
-    metaLabel: {
-        fontWeight: 'bold',
     },
     statusUpcoming: { color: 'green' },
     statusExpired: { color: 'red' },

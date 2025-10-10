@@ -1,4 +1,4 @@
-import { addSessionToFirestore, deleteSession, editSession, getSessionListFromFirestore } from "@/src/firestore_controller";
+import { addSessionToFirestore, getSessionListFromFirestore } from "@/src/firestore_controller";
 import { Session } from "@/src/Session";
 import { useUser } from "@/src/UserContext";
 import { FontAwesome } from "@expo/vector-icons";
@@ -111,46 +111,15 @@ export default function Sessionsssss() {
     }
 
     const handleEditButton = (session: Session) => {
-        setIsEditing(true);
-        setSelectedSession(session);
-        setAddSessions(true);
-
         setTitle(session.title);
         setLocation(session.location);
         setDescription(session.description);
+        setDate(new Date(session.date));
+        setTime(new Date(session.time));
 
-        const dt = new Date(session.startMillis);
-        setDate(dt);
-        setTime(dt);
-
-
-    }
-
-    const handleDeleteButton = (session: Session) => {
-        const id = session.docId;
-        if (!id) {
-            Alert.alert("Error", "Missing session id.");
-            return;
-        }
-
-        Alert.alert('Delete', 'Are you sure you want to delete this session?', [{
-            text: 'No',
-            style: 'cancel'
-        },
-        {
-            text: 'Yes',
-            style: 'destructive',
-            onPress: async () => {
-                try {
-                    await deleteSession(id);
-                    setSelectedSession(null);
-                    await fetchSessions();
-                } catch (e) {
-                    console.log(e)
-                }
-
-            }
-        }])
+        setIsEditing(true);
+        setSelectedSession(null);
+        setAddSessions(true);
     }
 
 
@@ -161,6 +130,31 @@ export default function Sessionsssss() {
         setLocation("");
         setDate(new Date());
         setTime(new Date());
+    }
+
+    const handleEditingModeCancel = async () => {
+            return (
+                <Pressable onPress={() => {
+                    Alert.alert("Cancel", "Are you sure you want to cancel your changes?", [
+                        {
+                            text: "No",
+                            style: "cancel"
+                        },
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                setAddSessions(false);
+                            },
+                            style: 'destructive'
+                        }
+                    ])
+                }} style={({ pressed }) => [
+                    [styles.btn],
+                    pressed && styles.loginBtnPressed,
+                ]}>
+                    <Text style={{ color: '#fff' }}>Cancel</Text>
+                </Pressable>
+            );
     }
 
     const handlePublish = () => {
@@ -184,39 +178,6 @@ export default function Sessionsssss() {
             successfulPublish();
         }
 
-    }
-
-    const handleRePublish = async () => {
-        const createdByEmail = user?.email ?? 'Admin';
-
-        try {
-            const combined = new Date(date);
-            combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
-            const startMillis = combined.getTime();
-            const sessionData: Omit<Session, 'docId' | 'timestamp'> = {
-                title: title,
-                description: description !== "" ? description : "No description provided",
-                date: fmt(date),
-                time: fmtTime(time),
-                location: location,
-                createdBy: createdByEmail,
-                startMillis,
-            };
-
-            if (!selectedSession || !selectedSession.docId) {
-                Alert.alert("Error", "Missing session id.");
-                return;
-            }
-            await editSession(selectedSession.docId, sessionData);
-            await fetchSessions();
-            setIsEditing(false);
-            publishReset();
-            setSelectedSession(null);
-            setAddSessions(false);
-
-        } catch (e) {
-            console.error(e);
-        }
     }
     const isFuture = (s: Session) => (s.startMillis) > Date.now();
 
@@ -248,7 +209,7 @@ export default function Sessionsssss() {
                         return (
                             <View style={styles.subCard}>
                                 <Pressable
-                                    style={styles.row}
+                                    style={styles.row}               // <- use relative positioning
                                     onPress={() => setSelectedSession(item)}
                                 >
                                     <Text style={styles.title}>{item.title}</Text>
@@ -279,7 +240,6 @@ export default function Sessionsssss() {
                     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} style={styles.centered}>
                         <Pressable style={styles.backdrop} onPress={() => setSelectedSession(null)} />
                         <View style={styles.modalCard}>
-
                             {user?.email === 'Admin' ? (
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -291,11 +251,6 @@ export default function Sessionsssss() {
                                                 paddingHorizontal: 10,
                                                 paddingVertical: 6,
                                                 borderRadius: 6
-                                            }}
-                                            onPress={() => {
-                                                if (selectedSession) {
-                                                    handleEditButton(selectedSession)
-                                                }
                                             }}
                                         >
                                             <FontAwesome name='edit' size={14} color='white' style={{ marginRight: 6 }} />
@@ -312,11 +267,6 @@ export default function Sessionsssss() {
                                                 paddingVertical: 6,
                                                 borderRadius: 6
                                             }}
-                                            onPress={() => {
-                                                if (selectedSession) {
-                                                    handleDeleteButton(selectedSession)
-                                                }
-                                            }}
                                         >
                                             <FontAwesome name='trash' size={14} color='white' style={{ marginRight: 6 }} />
                                             <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}>Delete</Text>
@@ -324,34 +274,28 @@ export default function Sessionsssss() {
                                     </View>
                                 </View>
                             ) : null}
-                            <ScrollView
-                                automaticallyAdjustKeyboardInsets>
-                                <View style={{ borderRadius: 1, padding: 5, alignItems: 'center' }}>
-                                    <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12 }}>{selectedSession?.title}</Text>
-                                </View>
-                                <View style={styles.metaRow}>
-                                    <Text style={styles.meta}>
-                                        <Text style={styles.metaLabel}>Date: </Text>
-                                        {selectedSession?.date}
-                                    </Text>
-
-                                    <View style={{ flex: 1, marginLeft: 20 }}>
-                                        <Text style={styles.meta} numberOfLines={2} ellipsizeMode="tail">
-                                            <Text style={styles.metaLabel}>Location: </Text>
-                                            {selectedSession?.location}
-                                        </Text>
-                                    </View>
-                                </View>
+                            <View style={{ borderRadius: 1, padding: 5, alignItems: 'center' }}>
+                                <Text style={{ fontWeight: '700', fontSize: 18, marginBottom: 12 }}>{selectedSession?.title}</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Text style={{ marginTop: 3 }}>
-                                    <Text style={{ fontWeight: 'bold' }}>Time: </Text>
-                                    {selectedSession?.time}
+                                    <Text style={{ fontWeight: 'bold' }}>Date: </Text>
+                                    {selectedSession?.date}
                                 </Text>
+                                <Text style={{ marginTop: 3 }}>
+                                    <Text style={{ fontWeight: 'bold' }}>Location: </Text>
+                                    {selectedSession?.location}
+                                </Text>
+                            </View>
+                            <Text style={{ marginTop: 3 }}>
+                                <Text style={{ fontWeight: 'bold' }}>Time: </Text>
+                                {selectedSession?.time}
+                            </Text>
 
-                                <Text style={{ marginTop: 10 }}>
-                                    <Text style={{ fontWeight: 'bold' }}>Description: </Text>
-                                    {selectedSession?.description}
-                                </Text>
-                            </ScrollView>
+                            <Text style={{ marginTop: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>Description: </Text>
+                                {selectedSession?.description}
+                            </Text>
                         </View>
                     </KeyboardAvoidingView>
                 </Modal>
@@ -450,52 +394,34 @@ export default function Sessionsssss() {
                                     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
 
                                         {isEditing ? (<Pressable onPress={() => {
-                                            Alert.alert("Cancel", "Are you sure you want to cancel your changes?", [
-                                                {
-                                                    text: "No",
-                                                    style: "cancel"
-                                                },
-                                                {
-                                                    text: "Yes",
-                                                    onPress: () => {
-                                                        setAddSessions(false);
-                                                    },
-                                                    style: 'destructive'
-                                                }
-                                            ])
-                                        }} style={({ pressed }) => [
-                                            [styles.btn],
-                                            pressed && styles.loginBtnPressed,
-                                        ]}>
-                                            <Text style={{ color: '#fff' }}>Cancel</Text>
-                                        </Pressable>) : ((<Pressable onPress={() => {
-                                            Alert.alert("Save changes?", "Do you want to save your changes?", [
-                                                {
-                                                    text: "No",
-                                                    onPress: () => {
-                                                        publishReset();
+                    Alert.alert("Cancel", "Are you sure you want to cancel your changes?", [
+                        {
+                            text: "No",
+                            style: "cancel"
+                        },
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                setAddSessions(false);
+                            },
+                            style: 'destructive'
+                        }
+                    ])
+                }} style={({ pressed }) => [
+                    [styles.btn],
+                    pressed && styles.loginBtnPressed,
+                ]}>
+                    <Text style={{ color: '#fff' }}>Cancel</Text>
+                </Pressable>) : }
 
-                                                    }
-                                                },
-                                                {
-                                                    text: "Yes",
-                                                    onPress: () => {
-                                                        setAddSessions(false);
-                                                    }
-                                                }
-                                            ])
-                                        }} style={({ pressed }) => [
-                                            [styles.btn],
-                                            pressed && styles.loginBtnPressed,
-                                        ]}>
-                                            <Text style={{ color: '#fff' }}>Cancel</Text>
-                                        </Pressable>))}
+                                        
+
 
 
                                         <View style={{ width: 12 }} />
                                         <Pressable disabled={
                                             title.length === 0 || location.length === 0 || time == null || date == null ? true : false
-                                        } onPress={isEditing ? handleRePublish : handlePublish}
+                                        } onPress={handlePublish}
                                             android_ripple={{ color: "rgba(255,255,255,0.2)" }}   // Android ripple
                                             style={({ pressed }) => [
                                                 title.length === 0 || location.length === 0 || time == null || date == null ? [styles.btn, styles.loginBtnPressed] : [styles.btn],
@@ -659,17 +585,6 @@ const styles = StyleSheet.create({
         bottom: 8,
         fontSize: 12,
         fontWeight: '600',
-    },
-    metaRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    meta: {
-        fontSize: 14,
-        color: 'black',
-    },
-    metaLabel: {
-        fontWeight: 'bold',
     },
     statusUpcoming: { color: 'green' },
     statusExpired: { color: 'red' },

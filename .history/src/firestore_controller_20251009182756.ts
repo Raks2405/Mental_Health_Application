@@ -36,7 +36,7 @@ export async function addSessionToFirestore(
 ) {
     const payload = {
         ...data,
-        timestamp: serverTimestamp(), // server time in Firestore
+        createdAt: serverTimestamp(), // server time in Firestore
     };
     const docRef = await addDoc(collection(db, SESSIONS), payload);
     return docRef.id;
