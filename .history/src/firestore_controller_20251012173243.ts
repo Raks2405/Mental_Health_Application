@@ -1,0 +1,100 @@
+// src/firestore_controller.ts
+import {
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    getFirestore,
+    orderBy,
+    query,
+    serverTimestamp,
+    Timestamp,
+    updateDoc
+} from 'firebase/firestore';
+import { app } from './firebase';
+import { useState, useEffect } from 'react';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const db = getFirestore(app);
+
+export interface Session {
+    docId?: string;
+    title: string;
+    description: string;
+    date: string;   // formatted date text you store from UI
+    time: string;   // formatted time text
+    location: string;
+    createdBy: string; // email or uid
+    timestamp: Date;
+    startMillis: number;   // JS Date for your model (Firestore stores Timestamp)
+}
+
+const SESSIONS = 'sessions';
+const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
+const SEEN_KEY = 'Sessions_seen';
+
+useEffect(() => {
+  (async () => {
+    try {
+      const raw = await AsyncStorage.getItem(SEEN_KEY);
+      if (raw) setSeenIds(new Set(JSON.parse(raw)));
+    } catch {}
+  })();
+}, []);
+
+
+// CREATE
+export async function addSessionToFirestore(
+    data: Omit<Session, 'docId' | 'timestamp'> & { startMillis: number },
+) {
+    const payload = {
+        ...data,
+        timestamp: serverTimestamp(), // server time in Firestore
+    };
+    const docRef = await addDoc(collection(db, SESSIONS), payload);
+    return docRef.id;
+}
+
+
+// READ (newest first)
+export async function getSessionListFromFirestore(): Promise<Session[]> {
+    const q = query(collection(db, SESSIONS), orderBy('timestamp', 'desc'));
+    const snap = await getDocs(q);
+
+    return snap.docs.map((d) => {
+        const raw = d.data() as any;
+        const ts: Timestamp | undefined = raw.timestamp;
+        return {
+            docId: d.id,
+            title: raw.title ?? '',
+            description: raw.description ?? '',
+            date: raw.date ?? '',
+            time: raw.time ?? '',
+            location: raw.location ?? '',
+            createdBy: raw.createdBy ?? '',
+            timestamp: ts ? ts.toDate() : new Date(0),
+            startMillis:
+                typeof raw.startMillis === 'number'
+                    ? raw.startMillis
+                    : (raw.startMillis?.toMillis?.() ?? 0),
+        } as Session;
+    });
+}
+
+export async function editSession(docId: string, updateData: any) {
+    const docRef = doc(db, SESSIONS, docId);
+
+    const payload = {
+        ...updateData,
+        updatedAt: serverTimestamp(),
+    };
+
+    await updateDoc(docRef as any, payload)
+}
+
+export async function deleteSession(docId: string) {
+    const docRef = doc(db, SESSIONS, docId);
+    await deleteDoc(docRef);
+}
