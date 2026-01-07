@@ -1,11 +1,12 @@
-import React from "react";
-import { View, Alert } from "react-native";
-import { FAB, Provider } from "react-native-paper";
 import ThemeBackground from "@/src/shared/ThemeBackground"; // keep your current ThemeBackground path
-import { useSessions } from "../hooks/useSessions";
-import SessionListContent from "../components/SessionListContent";
+import React from "react";
+import { Alert, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { FAB, Provider } from "react-native-paper";
 import GuestLockScreen from "../components/GuestLockScreen";
+import SessionListContent from "../components/SessionListContent";
 import SessionModalAdmin from "../components/SessionModalAdmin";
+import { useSessions } from "../hooks/useSessions";
 
 export default function SessionsScreen() {
     const {
@@ -41,7 +42,8 @@ export default function SessionsScreen() {
 
     return (
         <ThemeBackground>
-            <View style={{ flex: 1 }}>
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={{ flex: 1 }}>
                 <SessionListContent
                     sessionLists={sessionLists}
                     isLoading={isLoading}
@@ -61,6 +63,7 @@ export default function SessionsScreen() {
                     <Provider>
                         <FAB
                             icon="plus"
+                            color="#fff"
                             style={{
                                 position: "absolute",
                                 alignSelf: "flex-end",
@@ -132,11 +135,12 @@ export default function SessionsScreen() {
                                         ]
                                     );
                                 }
-                            }}
-                        />
+                    }}
+                />
                     </Provider>
                 )}
-            </View>
+                </View>
+            </SafeAreaView>
         </ThemeBackground>
     );
 }
