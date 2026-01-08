@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
-import { Alert, DeviceEventEmitter } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { useUser } from "@/src/context/UserContext";
 import {
   addSessionToFirestore,
   deleteSession,
   editSession,
   getSessionListFromFirestore
-} from "@/src/firestore_controller";
-import { Session } from "@/src/Session";
-import { useUser } from "@/src/UserContext";
+} from "@/src/services/firestore_controller";
+import { Session } from "@/src/types/Session";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, DeviceEventEmitter, Platform } from "react-native";
 
 export function useSessions() {
   const { user } = useUser();
@@ -22,7 +21,7 @@ export function useSessions() {
   const [location, setLocation] = useState("");
   const [sessionLists, setSessionLists] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
 
@@ -48,7 +47,7 @@ export function useSessions() {
       if (prev.has(id)) return prev;
       const next = new Set(prev);
       next.add(id);
-      AsyncStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(next))).catch(() => {});
+      AsyncStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(next))).catch(() => { });
       return next;
     });
     setTimeout(() => DeviceEventEmitter.emit("sessions-seen-updated"), 50);
@@ -71,7 +70,10 @@ export function useSessions() {
 
   useEffect(() => {
     if (user && user.email !== "Guest") fetchSessions();
-    else setSessionLists([]);
+    else {
+      setSessionLists([]);
+      setIsLoading(false);
+    }
   }, [fetchSessions, user?.email]);
 
   // FORMATTERS
@@ -80,24 +82,8 @@ export function useSessions() {
   const fmtTime = (d: Date) =>
     d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 
-  // ANDROID PICKERS (for when you call them directly elsewhere)
-  const openAndroidDate = () => {
-    DateTimePickerAndroid.open({
-      value: date,
-      onChange: (_e, selected) => setDate(selected || date),
-      mode: "date",
-      display: "default"
-    });
-  };
-  const openAndroidTime = () => {
-    DateTimePickerAndroid.open({
-      value: time,
-      onChange: (_e, selected) => setTime(selected || time),
-      mode: "time",
-      display: "clock",
-      is24Hour: false
-    });
-  };
+  
+  const isFuture = (s: Session) => s.startMillis > Date.now();
 
   // CRUD
   const publishReset = () => {
@@ -113,7 +99,7 @@ export function useSessions() {
     const createdByEmail = user?.email ?? "Admin";
     const combined = new Date(date);
     combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
-    const startMillis = combined.getTime();
+    
     const sessionData: Omit<Session, "docId" | "timestamp"> = {
       title,
       description: description !== "" ? description : "No description provided",
@@ -121,7 +107,7 @@ export function useSessions() {
       time: fmtTime(time),
       location,
       createdBy: createdByEmail,
-      startMillis,
+      startMillis: combined.getTime(),
     };
     try {
       await addSessionToFirestore(sessionData);
@@ -219,8 +205,6 @@ export function useSessions() {
     }
   };
 
-  const isFuture = (s: Session) => s.startMillis > Date.now();
-
   return {
     user,
     addSessions, setAddSessions,
@@ -236,7 +220,6 @@ export function useSessions() {
     seenIds, markSeen,
     fetchSessions,
     fmt, fmtTime,
-    openAndroidDate, openAndroidTime,
     publishReset,
     handlePublish,
     handleRePublish,

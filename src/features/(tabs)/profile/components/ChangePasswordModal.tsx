@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import CheckBox from "expo-checkbox";
+import GradientView from "@/src/shared/GradientView";
 import { styles } from "../styles/profile.styles";
 
 type Props = {
@@ -45,7 +45,7 @@ export default function ChangePasswordModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.centered}>
         <Pressable style={styles.backdrop} onPress={() => !saving && onClose()} />
-        <LinearGradient
+        <GradientView
           colors={["#2372a7ff", "#168895ff", "#032527ff"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -102,7 +102,7 @@ export default function ChangePasswordModal({
               </Pressable>
             </View>
           </View>
-        </LinearGradient>
+        </GradientView>
       </KeyboardAvoidingView>
     </Modal>
   );

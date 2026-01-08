@@ -1,5 +1,5 @@
-import { getSessionListFromFirestore } from '@/src/firestore_controller';
-import { useUser } from '@/src/UserContext';
+import { useUser } from '@/src/context/UserContext';
+import { getSessionListFromFirestore } from '@/src/services/firestore_controller';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Tabs, useFocusEffect } from 'expo-router';

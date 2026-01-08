@@ -7,9 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mentalhealthapplication",
     "userInterfaceStyle": "automatic",
-
-    "newArchEnabled": false,
-
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.MHA.myapp",
@@ -17,7 +14,6 @@
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -29,14 +25,13 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.Mental_Health_Application"
     },
-
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-
     "plugins": [
       "expo-router",
+      "expo-dev-client",
       [
         "expo-splash-screen",
         {
@@ -59,14 +54,14 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker"
+      
     ],
-
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
-
     "extra": {
       "router": {},
       "eas": {

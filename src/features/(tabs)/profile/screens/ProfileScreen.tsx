@@ -1,11 +1,11 @@
 import React from "react";
 import { View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import ThemeBackground from "../../../../shared/ThemeBackground";
-import ProfileCard from "../components/ProfileCard";
 import ChangePasswordModal from "../components/ChangePasswordModal";
+import ProfileCard from "../components/ProfileCard";
 import { useProfile } from "../hooks/useProfile";
 import { styles } from "../styles/profile.styles";
+import GradientView from "@/src/shared/GradientView";
 
 export default function ProfileScreen() {
   const {
@@ -28,12 +28,7 @@ export default function ProfileScreen() {
   return (
     <ThemeBackground>
       {/* Background Glow */}
-      <LinearGradient
-        colors={["rgba(255,255,255,0.36)", "transparent"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.8, y: 0.2 }}
-        style={styles.bgGlow}
-      />
+      
 
       {/* ✅ Centered ProfileCard */}
       <View style={styles.cardWrapper}>

@@ -1,4 +1,4 @@
-import { signIn, signInGuest, signUp } from "@/src/auth";
+import { signIn, signInGuest, signUp } from "@/server/auth";
 
 export const authService = {
   signIn,

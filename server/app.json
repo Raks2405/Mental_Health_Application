@@ -1,0 +1,10 @@
+﻿{
+  "expo": {
+    "name": "mental-health-backend",
+    "slug": "mental-health-backend",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.rakshith_raks.mentalhealthbackend"
+    }
+  }
+}

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   Image,
@@ -13,6 +12,7 @@ import {
 import { FirebaseError } from "firebase/app";
 import { authService } from "../services/auth.service";
 import { authStyles as styles } from "../styles/auth.styles";
+import GradientView from "@/src/shared/GradientView";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function SignupScreen() {
   };
 
   return (
-    <LinearGradient
+    <GradientView
       colors={['#2372a7ff', '#168895ff', '#032527ff']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -61,12 +61,6 @@ export default function SignupScreen() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
         style={styles.centeredKV}
       >
-        <LinearGradient
-          colors={['rgba(255,255,255,0.36)', 'transparent']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.8, y: 0.2 }}
-          style={styles.bgGlow}
-        />
 
         <View style={styles.formGlass}>
           <Image
@@ -129,6 +123,6 @@ export default function SignupScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </GradientView>
   );
 }

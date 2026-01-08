@@ -1,17 +1,17 @@
+import { Session } from "@/src/types/Session";
+import { FontAwesome } from "@expo/vector-icons";
 import React from "react";
 import {
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
   Text,
   View,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome } from "@expo/vector-icons";
-import { Session } from "@/src/Session";
+import GradientView from "@/src/shared/GradientView";
 import { styles } from "../styles/sessions.styles";
 
 type Props = {
@@ -66,7 +66,7 @@ export default function SessionListContent({
         }
         contentContainerStyle={{ padding: 10, paddingBottom: 28 }}
         renderItem={({ item }) => (
-          <LinearGradient
+          <GradientView
             colors={["#2ebec9ff", "#94dbe1ff", "#e7e7e7ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -96,7 +96,7 @@ export default function SessionListContent({
                 {isFuture(item) ? "Upcoming" : "Expired"}
               </Text>
             </Pressable>
-          </LinearGradient>
+          </GradientView>
         )}
       />
 
@@ -118,14 +118,14 @@ export default function SessionListContent({
           />
 
           {/* OUTER gradient frame (kept) */}
-          <LinearGradient
+          <GradientView
             colors={["#2372a7ff", "#168895ff", "#032527ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.modalCardGradient}
           >
             {/* Glow (kept) */}
-            <LinearGradient
+            <GradientView
               colors={["rgba(255, 255, 255, 0.36)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.8, y: 0.2 }}
@@ -133,7 +133,7 @@ export default function SessionListContent({
             />
 
             {/* INNER glass gradient (this was missing – restores your spacing/padding) */}
-            <LinearGradient
+            <GradientView
               colors={["rgba(0, 125, 160, 0.18)", "rgba(0, 125, 160, 0.18)"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -267,8 +267,8 @@ export default function SessionListContent({
                   </View>
                 </ScrollView>
               </View>
-            </LinearGradient>
-          </LinearGradient>
+            </GradientView>
+          </GradientView>
         </KeyboardAvoidingView>
       </Modal>
     </>

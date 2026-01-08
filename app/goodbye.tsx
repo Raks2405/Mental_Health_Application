@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';

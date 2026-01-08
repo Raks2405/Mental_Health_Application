@@ -42,8 +42,8 @@ export default function SessionsScreen() {
 
     return (
         <ThemeBackground>
-            <SafeAreaView style={{ flex: 1 }}>
-                <View style={{ flex: 1 }}>
+
+            <View style={{ flex: 1 }}>
                 <SessionListContent
                     sessionLists={sessionLists}
                     isLoading={isLoading}
@@ -135,12 +135,12 @@ export default function SessionsScreen() {
                                         ]
                                     );
                                 }
-                    }}
-                />
+                            }}
+                        />
                     </Provider>
                 )}
-                </View>
-            </SafeAreaView>
+            </View>
+
         </ThemeBackground>
     );
 }

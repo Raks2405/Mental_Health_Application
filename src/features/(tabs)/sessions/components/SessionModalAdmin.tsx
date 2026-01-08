@@ -1,20 +1,18 @@
-import React from "react";
+import { FontAwesome } from "@expo/vector-icons";
+import React, { useState } from "react";
 import {
-  Modal,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
-  ScrollView,
   View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome } from "@expo/vector-icons";
-import DateTimePickerIOS, {
-  DateTimePickerAndroid,
-  type DateTimePickerEvent
-} from "@react-native-community/datetimepicker";
+
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import GradientView from "@/src/shared/GradientView";
 import { styles } from "../styles/sessions.styles";
 
 type Props = {
@@ -54,36 +52,15 @@ export default function SessionModalAdmin({
   onRePublish,
   onCancel
 }: Props) {
+
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);
+
   const fmt = (d: Date) =>
     d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   const fmtTime = (d: Date) =>
     d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 
-  // ANDROID pickers – correct static API
-  const openAndroidDate = () => {
-    DateTimePickerAndroid.open({
-      value: date,
-      onChange: (_e: DateTimePickerEvent, selected?: Date) => {
-        const current = selected || date;
-        setDate(current);
-      },
-      mode: "date",
-      display: "default"
-    });
-  };
-
-  const openAndroidTime = () => {
-    DateTimePickerAndroid.open({
-      value: time,
-      onChange: (_e: DateTimePickerEvent, selected?: Date) => {
-        const current = selected || time;
-        setTime(current);
-      },
-      mode: "time",
-      display: "clock",
-      is24Hour: false
-    });
-  };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -94,14 +71,14 @@ export default function SessionModalAdmin({
       >
         <Pressable style={styles.backdrop} onPress={onClose} />
 
-        <LinearGradient
+        <GradientView
           colors={["#2372a7ff", "#168895ff", "#032527ff"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.modalCardGradient}
         >
           {/* glow highlight */}
-          <LinearGradient
+          <GradientView
             colors={["rgba(255, 255, 255, 0.36)", "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.8, y: 0.2 }}
@@ -109,7 +86,7 @@ export default function SessionModalAdmin({
           />
 
           {/* glass card */}
-          <LinearGradient
+          <GradientView
             colors={["rgba(0, 125, 160, 0.18)", "rgba(0, 125, 160, 0.18)"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -130,52 +107,41 @@ export default function SessionModalAdmin({
                 onChangeText={setTitle}
               />
 
-              {/* iOS pickers */}
-              {Platform.OS === "ios" ? (
-                <>
-                  <Text style={styles.fieldLabel}>Select Date</Text>
-                  <View style={styles.pickerGlass}>
-                    <DateTimePickerIOS
-                      value={date}
-                      mode="date"
-                      display="default"
-                      onChange={(_e: DateTimePickerEvent, selected?: Date) =>
-                        setDate(selected ?? date)
-                      }
-                      style={{ width: "100%" }}
-                    />
-                  </View>
+             {/* DATE */}
+              <Text style={styles.fieldLabel}>Select Date</Text>
+              <Pressable onPress={() => setDatePickerVisible(true)} style={styles.inputGlassPressable}>
+                <FontAwesome name="calendar" size={14} color="#111827" />
+                <Text style={styles.inputGlassText}>{fmt(date)}</Text>
+              </Pressable>
 
-                  <Text style={styles.fieldLabel}>Select Time</Text>
-                  <View style={styles.pickerGlass}>
-                    <DateTimePickerIOS
-                      value={time}
-                      mode="time"
-                      display="clock"
-                      is24Hour={false}
-                      onChange={(_e: DateTimePickerEvent, selected?: Date) =>
-                        setTime(selected ?? time)
-                      }
-                      style={{ width: "100%" }}
-                    />
-                  </View>
-                </>
-              ) : (
-                // Android pickers
-                <>
-                  <Text style={styles.fieldLabel}>Select Date</Text>
-                  <Pressable onPress={openAndroidDate} style={styles.inputGlassPressable}>
-                    <FontAwesome name="calendar" size={14} color="#111827" />
-                    <Text style={styles.inputGlassText}>{fmt(date)}</Text>
-                  </Pressable>
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                date={date}
+                onConfirm={(selected) => {
+                  setDatePickerVisible(false);
+                  setDate(selected);
+                }}
+                onCancel={() => setDatePickerVisible(false)}
+              />
 
-                  <Text style={styles.fieldLabel}>Select Time</Text>
-                  <Pressable onPress={openAndroidTime} style={styles.inputGlassPressable}>
-                    <FontAwesome name="clock-o" size={14} color="#111827" />
-                    <Text style={styles.inputGlassText}>{fmtTime(time)}</Text>
-                  </Pressable>
-                </>
-              )}
+              {/* TIME */}
+              <Text style={styles.fieldLabel}>Select Time</Text>
+              <Pressable onPress={() => setTimePickerVisible(true)} style={styles.inputGlassPressable}>
+                <FontAwesome name="clock-o" size={14} color="#111827" />
+                <Text style={styles.inputGlassText}>{fmtTime(time)}</Text>
+              </Pressable>
+
+              <DateTimePickerModal
+                isVisible={isTimePickerVisible}
+                mode="time"
+                date={time}
+                onConfirm={(selected) => {
+                  setTimePickerVisible(false);
+                  setTime(selected);
+                }}
+                onCancel={() => setTimePickerVisible(false)}
+              />
 
               {/* Location */}
               <Text style={styles.fieldLabel}>Location</Text>
@@ -221,8 +187,8 @@ export default function SessionModalAdmin({
                 </Text>
               </Pressable>
             </View>
-          </LinearGradient>
-        </LinearGradient>
+          </GradientView>
+        </GradientView>
       </KeyboardAvoidingView>
     </Modal>
   );

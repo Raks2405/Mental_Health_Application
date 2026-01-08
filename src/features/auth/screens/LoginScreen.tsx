@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View
-} from "react-native";
+import { auth } from "@/server/firebase";
+import { useUser } from "@/src/context/UserContext";
 import { useRouter } from "expo-router";
-import { useUser } from "@/src/UserContext";
+import React, { useState } from "react";
+import {
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    View
+} from "react-native";
 import { authService } from "../services/auth.service";
-import { auth } from "@/src/firebase";
 import { authStyles as styles } from "../styles/auth.styles";
+import GradientView from "@/src/shared/GradientView";
 
 export const adminEmails = ["admin@uco.edu", "admin2@uco.edu"]; //HARD CODED ADMIN EMAILS
 
@@ -62,7 +62,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient
+    <GradientView
       colors={['#2372a7ff', '#168895ff', '#032527ff']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -73,12 +73,6 @@ export default function LoginScreen() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
         style={styles.centeredKV}
       >
-        <LinearGradient
-          colors={['rgba(255,255,255,0.36)', 'transparent']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.8, y: 0.2 }}
-          style={styles.bgGlow}
-        />
 
         <View style={styles.formGlass}>
           <Image
@@ -145,6 +139,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </GradientView>
   );
 }

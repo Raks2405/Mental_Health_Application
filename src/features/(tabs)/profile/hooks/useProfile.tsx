@@ -1,11 +1,11 @@
-import { useUser } from "@/src/UserContext";
-import { useCallback, useState } from "react";
-import { Alert } from "react-native";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
-import { auth } from "../../../../firebase";
-import { logOut } from "../../../../auth";
+import { useUser } from "@/src/context/UserContext";
 import { adminEmails } from "@/src/features/auth/screens/LoginScreen";
 import { router, useFocusEffect } from "expo-router";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import { useCallback, useState } from "react";
+import { Alert } from "react-native";
+import { logOut } from "../../../../../server/auth";
+import { auth } from "../../../../../server/firebase";
 
 export function useProfile() {
   const { user } = useUser();
