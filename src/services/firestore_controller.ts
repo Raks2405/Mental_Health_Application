@@ -14,8 +14,6 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../server/firebase';
 
-
-
 const db = getFirestore(app);
 
 export interface Session {
@@ -31,9 +29,6 @@ export interface Session {
 }
 
 const SESSIONS = 'sessions';
-
-
-
 
 // CREATE
 export async function addSessionToFirestore(

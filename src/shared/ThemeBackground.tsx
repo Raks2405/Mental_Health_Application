@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
-import GradientView from './GradientView';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Props = {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ export default function ThemeBackground({ children, style }: Props) {
   return (
     <View style={[styles.root, style]}>
       {/* background gradient (behind everything) */}
-      <GradientView
+      <LinearGradient
         colors={['#2372a7ff', '#168895ff', '#06474aff']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

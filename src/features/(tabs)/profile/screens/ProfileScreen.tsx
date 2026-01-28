@@ -5,7 +5,6 @@ import ChangePasswordModal from "../components/ChangePasswordModal";
 import ProfileCard from "../components/ProfileCard";
 import { useProfile } from "../hooks/useProfile";
 import { styles } from "../styles/profile.styles";
-import GradientView from "@/src/shared/GradientView";
 
 export default function ProfileScreen() {
   const {

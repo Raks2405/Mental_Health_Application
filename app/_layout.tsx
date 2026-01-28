@@ -3,9 +3,11 @@ import { UserProvider } from "@/src/context/UserContext";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { Provider } from "react-native-paper";
 
 export default function RootLayout() {
   return (
+    <Provider>
     <ErrorBoundary>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 2 }} edges={[ 'left', 'right']}>
@@ -21,5 +23,6 @@ export default function RootLayout() {
         </SafeAreaView>
       </SafeAreaProvider>
     </ErrorBoundary>
+    </Provider>
   )
 }

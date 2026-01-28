@@ -19,8 +19,7 @@ export const styles = StyleSheet.create({
     },
     cardWrapper: {
         flex: 1,
-        justifyContent: 'center',   // vertical centering
-        alignItems: 'center',       // horizontal centering
+        paddingVertical: 50,
         paddingHorizontal: 16,
     },
 

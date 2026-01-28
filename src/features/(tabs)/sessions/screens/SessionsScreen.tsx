@@ -52,7 +52,6 @@ export default function SessionsScreen() {
                     seenIds={seenIds}
                     markSeen={markSeen}
                     isFuture={isFuture}
-                    // NEW (no logic change; just wiring)
                     isAdmin={user?.email === "Admin"}
                     onEdit={handleEditButton}
                     onDelete={handleDeleteButton}

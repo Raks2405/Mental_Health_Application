@@ -11,7 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
-import GradientView from "@/src/shared/GradientView";
+import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "../styles/sessions.styles";
 
 type Props = {
@@ -66,7 +66,7 @@ export default function SessionListContent({
         }
         contentContainerStyle={{ padding: 10, paddingBottom: 28 }}
         renderItem={({ item }) => (
-          <GradientView
+          <LinearGradient
             colors={["#2ebec9ff", "#94dbe1ff", "#e7e7e7ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -96,7 +96,7 @@ export default function SessionListContent({
                 {isFuture(item) ? "Upcoming" : "Expired"}
               </Text>
             </Pressable>
-          </GradientView>
+          </LinearGradient>
         )}
       />
 
@@ -118,14 +118,14 @@ export default function SessionListContent({
           />
 
           {/* OUTER gradient frame (kept) */}
-          <GradientView
+          <LinearGradient
             colors={["#2372a7ff", "#168895ff", "#032527ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.modalCardGradient}
           >
             {/* Glow (kept) */}
-            <GradientView
+            <LinearGradient
               colors={["rgba(255, 255, 255, 0.36)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.8, y: 0.2 }}
@@ -133,7 +133,7 @@ export default function SessionListContent({
             />
 
             {/* INNER glass gradient (this was missing – restores your spacing/padding) */}
-            <GradientView
+            <LinearGradient
               colors={["rgba(0, 125, 160, 0.18)", "rgba(0, 125, 160, 0.18)"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -267,8 +267,8 @@ export default function SessionListContent({
                   </View>
                 </ScrollView>
               </View>
-            </GradientView>
-          </GradientView>
+            </LinearGradient>
+          </LinearGradient>
         </KeyboardAvoidingView>
       </Modal>
     </>

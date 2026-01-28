@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { authService } from "../services/auth.service";
 import { authStyles as styles } from "../styles/auth.styles";
-import GradientView from "@/src/shared/GradientView";
+import { LinearGradient } from "expo-linear-gradient";
 
 export const adminEmails = ["admin@uco.edu", "admin2@uco.edu"]; //HARD CODED ADMIN EMAILS
 
@@ -62,7 +62,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <GradientView
+    <LinearGradient
       colors={['#2372a7ff', '#168895ff', '#032527ff']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -139,6 +139,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
-    </GradientView>
+    </LinearGradient>
   );
 }

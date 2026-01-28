@@ -12,7 +12,7 @@ import {
 import { FirebaseError } from "firebase/app";
 import { authService } from "../services/auth.service";
 import { authStyles as styles } from "../styles/auth.styles";
-import GradientView from "@/src/shared/GradientView";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function SignupScreen() {
   };
 
   return (
-    <GradientView
+    <LinearGradient
       colors={['#2372a7ff', '#168895ff', '#032527ff']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -123,6 +123,6 @@ export default function SignupScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
-    </GradientView>
+    </LinearGradient>
   );
 }

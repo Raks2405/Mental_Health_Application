@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import GradientView from "@/src/shared/GradientView";
+import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "../styles/sessions.styles";
 
 type Props = {
@@ -71,14 +71,14 @@ export default function SessionModalAdmin({
       >
         <Pressable style={styles.backdrop} onPress={onClose} />
 
-        <GradientView
+        <LinearGradient
           colors={["#2372a7ff", "#168895ff", "#032527ff"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.modalCardGradient}
         >
           {/* glow highlight */}
-          <GradientView
+          <LinearGradient
             colors={["rgba(255, 255, 255, 0.36)", "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.8, y: 0.2 }}
@@ -86,7 +86,7 @@ export default function SessionModalAdmin({
           />
 
           {/* glass card */}
-          <GradientView
+          <LinearGradient
             colors={["rgba(0, 125, 160, 0.18)", "rgba(0, 125, 160, 0.18)"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -187,8 +187,8 @@ export default function SessionModalAdmin({
                 </Text>
               </Pressable>
             </View>
-          </GradientView>
-        </GradientView>
+          </LinearGradient>
+        </LinearGradient>
       </KeyboardAvoidingView>
     </Modal>
   );

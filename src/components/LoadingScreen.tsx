@@ -1,10 +1,10 @@
-import GradientView from "@/src/shared/GradientView";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 export default function LoadingScreen({ message = "Loading..." }: { message?: string }) {
   return (
-    <GradientView
+    <LinearGradient
       colors={['#2372a7ff', '#168895ff', '#032527ff']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -15,7 +15,7 @@ export default function LoadingScreen({ message = "Loading..." }: { message?: st
         <Text style={styles.message}>{message}</Text>
         <Text style={styles.subtitle}>Please wait while we prepare your experience</Text>
       </View>
-    </GradientView>
+    </LinearGradient>
   );
 }
 
