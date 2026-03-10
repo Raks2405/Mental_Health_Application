@@ -5,12 +5,14 @@ import React from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { FAB } from "react-native-paper";
 import QuestionScreen, { QuestionScreenHandle } from "./QuestionScreen";
+import { RecommendationProvider, useRecommendation } from "../context/RecommendationContext";
 
-export default function HomeLayout() {
+function HomeLayoutContent() {
   const isFocused = useIsFocused();
   const [showQuestions, setShowQuestions] = React.useState(false);
   const [canGoBack, setCanGoBack] = React.useState(false);
   const questionRef = React.useRef<QuestionScreenHandle>(null);
+  const { setRecommendation } = useRecommendation();
 
   React.useEffect(() => {
     if (!isFocused && showQuestions) {
@@ -42,46 +44,60 @@ export default function HomeLayout() {
             style={styles.modalKeyboard}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalCard}>
-              <View style={styles.modalHeader}>
-                <Pressable
-                  onPress={() => questionRef.current?.goBack()}
-                  disabled={!canGoBack}
-                >
-                  <Text
-                    
-                    style={[
-                      styles.modalClose,
-                      { paddingLeft: 5 },
-                      !canGoBack && styles.modalCloseDisabled,
-                    ]}
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalCard}>
+                <View style={styles.modalHeader}>
+                  <Pressable
+                    onPress={() => questionRef.current?.goBack()}
+                    disabled={!canGoBack}
                   >
-                    Back
+                    <Text
+                      style={[
+                        styles.modalClose,
+                        { paddingLeft: 5 },
+                        !canGoBack && styles.modalCloseDisabled,
+                      ]}
+                    >
+                      Back
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.modalTitle}>Quick Questions</Text>
+                  <Pressable onPress={() => setShowQuestions(false)}>
+                    <Text style={styles.modalClose}>Close</Text>
+                  </Pressable>
+                </View>
+                <View style={{ padding: 10, alignItems: "center" }}>
+                  <Text style={{ color: "#ba3131ff", fontSize: 16, fontWeight: "bold" }}>
+                    IMPORTANT:
+                    These are few questions to help you find the right resources.
+                    Your answers will not be stored or shared.
+                    You can always choose to skip this step.
                   </Text>
-                </Pressable>
-                <Text style={styles.modalTitle}>Quick Questions</Text>
-                <Pressable onPress={() => setShowQuestions(false)}>
-                  <Text style={styles.modalClose}>Close</Text>
-                </Pressable>
-              </View>
-              <View style={{padding: 10, alignItems: 'center'}}>
-                <Text style={{color: '#ba3131ff', fontSize: 16, fontWeight: 'bold'}}>
-                  IMPORTANT:
-                  These are few questions to help you find the right resources.
-                  Your answers will not be stored or shared.
-                  You can always choose to skip this step.
-                </Text>
-              </View>
-              <View style={styles.modalContent}>
-                <QuestionScreen ref={questionRef} onCanGoBackChange={setCanGoBack} />
+                </View>
+                <View style={styles.modalContent}>
+                  <QuestionScreen
+                    ref={questionRef}
+                    onCanGoBackChange={setCanGoBack}
+                    onComplete={(result) => {
+                      setRecommendation(result);
+                      setShowQuestions(false);
+                    }}
+                  />
+                </View>
               </View>
             </View>
-          </View>
           </KeyboardAvoidingView>
         </Modal>
       </View>
     </ThemeBackground>
+  );
+}
+
+export default function HomeLayout() {
+  return (
+    <RecommendationProvider>
+      <HomeLayoutContent />
+    </RecommendationProvider>
   );
 }
 
