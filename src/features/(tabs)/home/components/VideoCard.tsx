@@ -1,14 +1,16 @@
 import React from "react";
 import { Image, Pressable, StyleSheet, Text, View, Linking } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 type Props = {
   videoId: string;
   title: string;
   channel?: string;
   duration?: string;
+  recommended?: boolean;
 };
 
-export default function VideoCard({ videoId, title, channel, duration }: Props) {
+export default function VideoCard({ videoId, title, channel, duration, recommended }: Props) {
   const thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   const webUrl = `https://www.youtube.com/watch?v=${videoId}`;
   const appUrl = `vnd.youtube://${videoId}`;
@@ -30,6 +32,12 @@ export default function VideoCard({ videoId, title, channel, duration }: Props) 
       </View>
 
       <View style={s.infoCard}>
+        {recommended ? (
+          <View style={s.recoPill}>
+            <FontAwesome name="magic" size={12} color="#02131a" style={s.aiIcon} />
+            <Text style={s.recoPillText}>AI RECOMMENDED</Text>
+          </View>
+        ) : null}
         <Text style={s.title} numberOfLines={2}>
           {title}
         </Text>
@@ -61,6 +69,25 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#134b61",
     marginTop: 10,
+  },
+  recoPill: {
+    alignSelf: "flex-start",
+    backgroundColor: "#22d3ee",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  recoPillText: {
+    color: "#02131a",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+  },
+  aiIcon: {
+    marginRight: 6,
   },
   title: {
     color: "white",

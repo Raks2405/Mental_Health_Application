@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -11,12 +12,24 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 type Props = {
   onSend: (text: string) => void | Promise<void>;
   disabled?: boolean;
+  keyboardOpen?: boolean;
+  onClear?: () => void;
+  showClear?: boolean;
 };
 
-export default function ChatInput({ onSend, disabled = false }: Props) {
+export default function ChatInput({
+  onSend,
+  disabled = false,
+  keyboardOpen = false,
+  onClear,
+  showClear = false,
+}: Props) {
   const [value, setValue] = useState("");
   const insets = useSafeAreaInsets();
-  const bottomPadding = useMemo(() => Math.max(insets.bottom, 12), [insets.bottom]);
+  const bottomPadding = useMemo(() => {
+    if (keyboardOpen && Platform.OS === "android") return 0;
+    return Math.max(insets.bottom, 12);
+  }, [insets.bottom, keyboardOpen]);
 
   const handleSend = () => {
     const trimmed = value.trim();
@@ -26,8 +39,19 @@ export default function ChatInput({ onSend, disabled = false }: Props) {
   };
 
   return (
-    
       <View style={[styles.shell, { paddingBottom: bottomPadding }]}>
+        {showClear ? (
+          <Pressable
+            onPress={onClear}
+            disabled={!onClear}
+            style={({ pressed }) => [
+              styles.clearButton,
+              pressed && styles.clearButtonPressed,
+            ]}
+          >
+            <Text style={styles.clearText}>Clear</Text>
+          </Pressable>
+        ) : null}
         <TextInput
           placeholder="Share a thought or ask for support..."
           placeholderTextColor="rgba(255,255,255,0.6)"
@@ -52,7 +76,6 @@ export default function ChatInput({ onSend, disabled = false }: Props) {
           <Text style={styles.sendText}>{disabled ? "..." : "Send"}</Text>
         </Pressable>
       </View>
-    
   );
 }
 
@@ -73,7 +96,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#0b2a36",
     color: "#f8fafc",
     fontSize: 15,
     lineHeight: 20,
@@ -85,6 +108,23 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 12,
+  },
+  clearButton: {
+    alignSelf: "center",
+    backgroundColor: "#0f3a4c",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#1a6b86",
+  },
+  clearButtonPressed: {
+    opacity: 0.8,
+  },
+  clearText: {
+    color: "#9ccfe6",
+    fontWeight: "800",
+    fontSize: 13,
   },
   sendButtonPressed: {
     opacity: 0.9,

@@ -1,13 +1,15 @@
 import React from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 type Props = {
   title: string;
   source: string;
   url: string;
+  recommended?: boolean;
 };
 
-export default function ArticleCard({ title, source, url }: Props) {
+export default function ArticleCard({ title, source, url, recommended }: Props) {
   const openArticle = () => {
     Linking.openURL(url);
   };
@@ -20,6 +22,12 @@ export default function ArticleCard({ title, source, url }: Props) {
         <View style={s.pill}>
           <Text style={s.pillText}>{source}</Text>
         </View>
+        {recommended ? (
+          <View style={s.recoPill}>
+            <FontAwesome name="magic" size={12} color="#02131a" style={s.aiIcon} />
+            <Text style={s.recoPillText}>AI RECOMMENDED</Text>
+          </View>
+        ) : null}
         <View style={s.readPill}>
           <Text style={s.readPillText}>READ</Text>
         </View>
@@ -63,8 +71,10 @@ const s = StyleSheet.create({
   },
   metaRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
     marginBottom: 8,
   },
   pill: {
@@ -88,6 +98,24 @@ const s = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1,
+  },
+  recoPill: {
+    backgroundColor: "#22d3ee",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginLeft: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  recoPillText: {
+    color: "#02131a",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+  },
+  aiIcon: {
+    marginRight: 6,
   },
   pillText: {
     color: "#b6e1ff",

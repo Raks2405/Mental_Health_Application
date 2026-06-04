@@ -9,9 +9,17 @@ type Props = {
   isGuest: boolean;
   onLogout: () => void;
   onChangePwd: () => void;
+  onOpenQuestions: () => void;
 };
 
-export default function ProfileCard({ email, isAdmin, isGuest, onLogout, onChangePwd }: Props) {
+export default function ProfileCard({
+  email,
+  isAdmin,
+  isGuest,
+  onLogout,
+  onChangePwd,
+  onOpenQuestions,
+}: Props) {
   return (
     <View style={styles.cardGlass}>
       <View style={styles.name_iconContainer}>
@@ -39,6 +47,16 @@ export default function ProfileCard({ email, isAdmin, isGuest, onLogout, onChang
         >
           <FontAwesome name="lock" size={22} color="#111827" style={{ marginRight: 10 }} />
           <Text style={styles.actionText}>Change Password</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.subCardGlass}>
+        <Pressable
+          style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}
+          onPress={onOpenQuestions}
+        >
+          <FontAwesome name="question-circle" size={22} color="#111827" style={{ marginRight: 10 }} />
+          <Text style={styles.actionText}>Quick Questions</Text>
         </Pressable>
       </View>
     </View>

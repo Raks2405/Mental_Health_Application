@@ -1,16 +1,25 @@
 import React, { useState } from "react";
 import { Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 type Props = {
   title: string;
   author: string;
-  isbn13: string;
+  isbn13?: string;
+  recommended?: boolean;
 };
 
-export default function BookCard({ title, author, isbn13 }: Props) {
+export default function BookCard({ title, author, isbn13, recommended }: Props) {
   const [coverError, setCoverError] = useState(false);
-  const coverUrl = `https://covers.openlibrary.org/b/isbn/${isbn13}-L.jpg?default=false`;
-  const openUrl = `https://openlibrary.org/isbn/${isbn13}`;
+  const hasCover = Boolean(isbn13);
+  const coverUrl = hasCover
+    ? `https://covers.openlibrary.org/b/isbn/${isbn13}-L.jpg?default=false`
+    : "";
+  const openUrl = hasCover
+    ? `https://openlibrary.org/isbn/${isbn13}`
+    : title?.trim()
+    ? `https://openlibrary.org/search?q=${encodeURIComponent(title)}`
+    : "https://openlibrary.org";
 
   const openBook = () => {
     Linking.openURL(openUrl);
@@ -19,7 +28,7 @@ export default function BookCard({ title, author, isbn13 }: Props) {
   return (
     <Pressable style={s.card} onPress={openBook} accessibilityRole="button">
       <View style={s.coverWrap}>
-        {!coverError ? (
+        {hasCover && !coverError ? (
           <Image
             source={{ uri: coverUrl }}
             style={s.cover}
@@ -42,6 +51,12 @@ export default function BookCard({ title, author, isbn13 }: Props) {
         <View style={s.connectorDot} />
       </View>
       <View style={s.infoCard}>
+        {recommended ? (
+          <View style={s.recoPill}>
+            <FontAwesome name="magic" size={12} color="#02131a" style={s.aiIcon} />
+            <Text style={s.recoPillText}>AI RECOMMENDED</Text>
+          </View>
+        ) : null}
         <Text style={s.title} numberOfLines={2}>
           {title}
         </Text>
@@ -93,6 +108,24 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#134b61",
     alignItems: "center",
+  },
+  recoPill: {
+    backgroundColor: "#22d3ee",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  recoPillText: {
+    color: "#02131a",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+  },
+  aiIcon: {
+    marginRight: 6,
   },
   connectorWrap: {
     flexDirection: "row",

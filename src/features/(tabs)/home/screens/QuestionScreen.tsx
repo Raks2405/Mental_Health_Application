@@ -5,8 +5,13 @@ import LoadingScreen from "@/src/components/LoadingScreen";
 import ArticleCard from "../components/ArticleCard";
 import BookCard from "../components/BookCard";
 import VideoCard from "../components/VideoCard";
-import { ARTICLE_CATEGORIES, BOOK_CATEGORIES, VIDEO_CATEGORIES } from "../data/resources";
 import type { CategoryKey, RecommendationStatus } from "../context/RecommendationContext";
+import {
+    getResourceCategoriesFromFirestore,
+    type ResourceCategoryMap,
+} from "../data/resourceFirestore";
+import { GEMINI_ENDPOINT, GEMINI_SAFETY_SETTINGS } from "@/src/utils/gemini";
+import { callGroqChat } from "@/src/utils/groq";
 
 type QuestionOption = {
     id: string;
@@ -42,6 +47,7 @@ type Props = {
         category: CategoryKey | null;
         status: RecommendationStatus;
         message?: string | null;
+        queryText?: string | null;
     }) => void;
 };
 
@@ -55,6 +61,17 @@ const CATEGORY_KEYS = [
     "loneliness",
     "anger",
     "burnout",
+    "happy",
+    "motivation",
+    "selfesteem",
+    "confidence",
+    "relationships",
+    "trauma",
+    "addiction",
+    "focus",
+    "ocd",
+    "ptsd",
+    "mindfulness",
 ] as const;
 
 const TAG_ALIASES: Record<string, CategoryKey> = {
@@ -84,12 +101,38 @@ const TAG_ALIASES: Record<string, CategoryKey> = {
     grieving: "grief",
     bereavement: "grief",
     burnedout: "burnout",
+    "burned out": "burnout",
     burnout: "burnout",
     unmotivated: "burnout",
     drained: "burnout",
     reflect: "reflect",
     meaning: "reflect",
     talk: "reflect",
+    happy: "happy",
+    happiness: "happy",
+    joyful: "happy",
+    optimistic: "happy",
+    motivation: "motivation",
+    motivated: "motivation",
+    drive: "motivation",
+    selfesteem: "selfesteem",
+    "self-esteem": "selfesteem",
+    "self esteem": "selfesteem",
+    "self worth": "selfesteem",
+    "self-worth": "selfesteem",
+    confidence: "confidence",
+    relationships: "relationships",
+    relationship: "relationships",
+    breakup: "relationships",
+    trauma: "trauma",
+    addiction: "addiction",
+    addicted: "addiction",
+    focus: "focus",
+    attention: "focus",
+    adhd: "focus",
+    ocd: "ocd",
+    ptsd: "ptsd",
+    mindfulness: "mindfulness",
 };
 
 const normalizeTag = (tag: string) => tag.trim().toLowerCase();
@@ -103,30 +146,90 @@ const mapTagToCategory = (tag: string | null | undefined): CategoryKey | null =>
     return TAG_ALIASES[normalized] ?? null;
 };
 
+const hasNegatedHappy = (text: string) =>
+    /\b(not|never|no)\s+(happy|optimistic|positive|joyful|joy)\b/i.test(text) ||
+    /\bunhappy\b/i.test(text);
+
+const hasNegatedSad = (text: string) =>
+    /\b(not|never|no)\s+(sad|down|depressed|depress|hopeless|low mood)\b/i.test(text);
+
+const hasFamilyIssue = (text: string) =>
+    /\bfamily\b|\bparents?\b|\bmother\b|\bfather\b|\bspouse\b|\bpartner\b|\bmarriage\b|\bdivorce\b/i.test(
+        text
+    );
+
+const hasAcademicIssue = (text: string) =>
+    /\bstudies\b|\bstudy\b|\bschool\b|\bcollege\b|\buniversity\b|\bexam(s)?\b|\bhomework\b|\bassignments?\b|\bgrades?\b|\bcoursework\b/i.test(
+        text
+    );
+
 const extractTagsFromText = (text: string): CategoryKey[] => {
     if (!text) return [];
     const lower = text.toLowerCase();
     const matches: CategoryKey[] = [];
+    const negatedHappy = hasNegatedHappy(lower);
+    const negatedSad = hasNegatedSad(lower);
+    const familyIssue = hasFamilyIssue(lower);
+    const academicIssue = hasAcademicIssue(lower);
 
     const rules: Array<[CategoryKey, RegExp]> = [
-        ["sad", /(sad|down|depress|hopeless|low mood)/i],
-        ["stress", /(stress|overwhelm|pressure)/i],
-        ["anxiety", /(anxiety|anxious|worry|panic|nervous)/i],
-        ["sleep", /(sleep|insomnia|night|tired|exhausted)/i],
-        ["reflect", /(reflect|talk|meaning|overthink|ruminate)/i],
-        ["grief", /(grief|loss|bereav)/i],
+        ["sad", /(sad|down|depress|hopeless|low mood|unhappy|empty|numb|cry)/i],
+        ["stress", /(stress|overwhelm|pressure|deadline|work|job|boss|money|finance|bills|exam|school|college|university|grades|coursework)/i],
+        ["anxiety", /(anxiety|anxious|worry|panic|nervous|fear|racing thoughts)/i],
+        ["sleep", /(sleep|insomnia|nightmare|tired|exhausted|can't sleep)/i],
+        ["reflect", /(reflect|talk|meaning|overthink|ruminate|thinking a lot)/i],
+        ["grief", /(grief|loss|bereav|mourning)/i],
         ["loneliness", /(lonely|alone|isolat|disconnected)/i],
-        ["anger", /(anger|angry|irritable|rage)/i],
-        ["burnout", /(burnout|burned out|unmotivated|drained)/i],
+        ["anger", /(anger|angry|irritable|rage|frustrat)/i],
+        ["burnout", /(burnout|burned out|unmotivated|drained|no energy)/i],
+        ["happy", /(happy|happiness|joy|optimistic|positive|grateful|content)/i],
+        ["motivation", /(motivation|motivated|drive|procrastin|stuck|can't start)/i],
+        ["selfesteem", /(self esteem|self-worth|self worth|insecure|worthless|self hate|not good enough)/i],
+        ["confidence", /(confidence|self-confidence|self confidence|fear of failure|doubt myself)/i],
+        ["relationships", /(relationship|breakup|partner|communication|family conflict|family|parents|mother|father|spouse|marriage|divorce)/i],
+        ["trauma", /(trauma|flashback|abuse|assault)/i],
+        ["addiction", /(addiction|substance|alcohol|drug use|craving)/i],
+        ["focus", /(focus|concentration|attention|adhd|study|studies|homework|assignment|distract)/i],
+        ["ocd", /(ocd|obsessive|compulsive|intrusive)/i],
+        ["ptsd", /(ptsd|post[- ]traumatic|trigger|hypervigil)/i],
+        ["mindfulness", /(mindful|mindfulness|meditation|breathing|grounding|calm)/i],
     ];
 
     rules.forEach(([key, rule]) => {
+        if (key === "happy" && negatedHappy) return;
+        if (key === "sad" && negatedSad) return;
         if (rule.test(lower)) {
             matches.push(key);
         }
     });
 
+    if (negatedHappy) {
+        matches.push("sad");
+    }
+    if (familyIssue) {
+        matches.push("relationships");
+        matches.push("relationships");
+    }
+    if (academicIssue) {
+        matches.push("focus");
+        matches.push("stress");
+    }
+
     return Array.from(new Set(matches));
+};
+
+const refineCategoryWithText = (description: string, candidate: CategoryKey | null) => {
+    if (!description) return candidate;
+    const negatedHappy = hasNegatedHappy(description);
+    const negatedSad = hasNegatedSad(description);
+    const familyIssue = hasFamilyIssue(description);
+    const academicIssue = hasAcademicIssue(description);
+    if (candidate === "happy" && negatedHappy) return "sad";
+    if (candidate === "sad" && negatedSad) return null;
+    if (candidate === "happy" && familyIssue) return "relationships";
+    if (!candidate && familyIssue) return "relationships";
+    if (!candidate && academicIssue) return "focus";
+    return candidate;
 };
 
 const pickCategory = (tags: CategoryKey[], fallback: CategoryKey): CategoryKey => {
@@ -173,16 +276,47 @@ const parseGeminiCategory = (raw: string): CategoryKey | null => {
 
 const buildGeminiPrompt = (description: string) => {
     return [
-        "You are a classifier. Map the user's description to one of these categories:",
-        "sad, stress, anxiety, sleep, reflect, grief, loneliness, anger, burnout.",
+        "You are a classifier. Read the FULL sentence(s) and infer the single best category.",
+        "Handle negations and context (e.g., 'not happy' is NOT happy; 'not sad' is NOT sad).",
+        "If family/relationship conflict is mentioned, choose relationships.",
+        "If school/work/finance pressure is mentioned, choose stress (or focus if it is mainly about concentration).",
+        "If multiple categories apply, choose the MOST dominant theme.",
+        "Categories:",
+        "sad, stress, anxiety, sleep, reflect, grief, loneliness, anger, burnout, happy, motivation, selfesteem, confidence, relationships, trauma, addiction, focus, ocd, ptsd, mindfulness.",
+        "Category guidance:",
+        "- sad: low mood, hopeless, depressed, crying, empty, numb",
+        "- stress: overwhelmed, pressure, deadlines, work/school/finance burdens",
+        "- anxiety: worry, panic, nervous, fear, racing thoughts",
+        "- sleep: insomnia, poor sleep, tired/exhausted, nightmares",
+        "- reflect: wants to talk/think, meaning, rumination, self-reflection",
+        "- grief: loss, bereavement, mourning",
+        "- loneliness: lonely, isolated, disconnected",
+        "- anger: angry, irritable, rage",
+        "- burnout: drained, exhausted by work, no energy, chronic overload",
+        "- happy: positive, grateful, joyful, optimistic (not negated)",
+        "- motivation: unmotivated, procrastination, stuck",
+        "- selfesteem: self-worth, insecure, self-hate, not good enough",
+        "- confidence: self-confidence, fear of failure, doubt in abilities",
+        "- relationships: family, partner, breakup, conflict, communication issues",
+        "- trauma: trauma, abuse, flashbacks",
+        "- addiction: substance use, alcohol, drugs, cravings",
+        "- focus: concentration, attention, ADHD, study focus",
+        "- ocd: intrusive thoughts, compulsions, obsessions",
+        "- ptsd: PTSD, triggers, hypervigilance",
+        "- mindfulness: meditation, breathing, calm, grounding",
         'If none fit, respond with {"category":"none"}.',
         'Respond with ONLY a JSON object like {"category":"sad"} and nothing else.',
+        "Examples:",
+        'Input: "I am not happy and I have problems with my family." -> {"category":"relationships"}',
+        'Input: "I am not sad, just tired." -> {"category":"sleep"}',
+        'Input: "I am not able to cope with my studies." -> {"category":"stress"}',
+        'Input: "I feel lonely and sad." -> {"category":"loneliness"}',
+        'Input: "I cannot sleep and I feel exhausted." -> {"category":"sleep"}',
+        'Input: "I feel overwhelmed with work and bills." -> {"category":"stress"}',
+        'Input: "I cannot concentrate on my assignments." -> {"category":"focus"}',
         `User description: """${description.trim()}"""`,
     ].join("\n");
 };
-
-const GEMINI_MODEL = "gemini-2.5-flash";
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
     ({ onCanGoBackChange, onComplete }, ref) => {
@@ -197,6 +331,8 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
     const [aiCategory, setAiCategory] = useState<CategoryKey | null>(null);
     const [aiStatus, setAiStatus] = useState<RecommendationStatus>("idle");
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [lastDescription, setLastDescription] = useState<string | null>(null);
+    const [resourceCategories, setResourceCategories] = useState<ResourceCategoryMap | null>(null);
     const base_url = process.env.EXPO_PUBLIC_API_BASE_URL;
     const completedRef = useRef(false);
 
@@ -221,6 +357,7 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
         setAnswerTags({});
         setAiCategory(null);
         setAiStatus("idle");
+        setLastDescription(null);
         setEndState(null);
         setCurrentId(flow.startQuestionId);
         setTextValue("");
@@ -273,11 +410,25 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
         load();
     }, [base_url]);
 
+    useEffect(() => {
+        let isActive = true;
+        getResourceCategoriesFromFirestore()
+            .then((categories) => {
+                if (isActive) setResourceCategories(categories);
+            })
+            .catch(() => {
+                if (isActive) setResourceCategories(null);
+            });
+        return () => {
+            isActive = false;
+        };
+    }, []);
+
     const question = flow && currentId ? flow.questions[currentId] : null;
     const isFreeText = question?.type === "free_text" || question?.type === "free_text_or_skip";
     const canSubmit = question?.type !== "free_text" || textValue.trim().length > 0;
 
-    const recommendedCategoryKey = useMemo(() => {
+    const collectedCategories = useMemo(() => {
         const collected: CategoryKey[] = [];
 
         if (endState && flow?.endStates[endState]?.resourceTag) {
@@ -292,11 +443,23 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
             });
         });
 
-        return pickCategory(collected, "sad");
+        return collected;
     }, [answerTags, endState, flow]);
+
+    const recommendedCategoryKey = useMemo(
+        () => pickCategory(collectedCategories, "reflect"),
+        [collectedCategories]
+    );
 
     const finalCategoryKey =
         aiStatus === "matched" && aiCategory ? aiCategory : recommendedCategoryKey;
+
+    const hasDescription = !!lastDescription?.trim();
+    const isGeneralLowInfoResult =
+        !hasDescription &&
+        aiStatus === "idle" &&
+        (collectedCategories.length === 0 ||
+            collectedCategories.every((category) => category === "reflect"));
 
     useEffect(() => {
         if (!endState) {
@@ -310,21 +473,49 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
                 category: null,
                 status: "unmatched",
                 message: "We don't have the category you are looking for yet. We are working on it.",
+                queryText: lastDescription,
+            });
+        } else if (isGeneralLowInfoResult) {
+            onComplete?.({
+                category: null,
+                status: "matched",
+                message:
+                    "You did not enter enough information for personalized recommendations. Showing general resources for now.",
+                queryText: null,
             });
         } else {
             onComplete?.({
                 category: finalCategoryKey,
                 status: "matched",
+                queryText: lastDescription,
             });
         }
         handleStartOver();
-    }, [aiStatus, endState, finalCategoryKey, handleStartOver, onComplete, recommendedCategoryKey]);
+    }, [
+        aiStatus,
+        endState,
+        finalCategoryKey,
+        handleStartOver,
+        isGeneralLowInfoResult,
+        lastDescription,
+        onComplete,
+    ]);
 
     const classifyDescription = useCallback(
         async (description: string) => {
             const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
             if (!apiKey) {
-                throw new Error("Missing EXPO_PUBLIC_GEMINI_API_KEY for category analysis.");
+                const groqText = await callGroqChat({
+                    messages: [{ role: "user", content: buildGeminiPrompt(description) }],
+                    maxTokens: 64,
+                    temperature: 0.2,
+                });
+                const candidate = parseGeminiCategory(groqText ?? "");
+                const refined = refineCategoryWithText(description, candidate);
+                if (refined) return refined;
+                const fallbackTags = extractTagsFromText(description);
+                if (fallbackTags.length > 0) return pickCategory(fallbackTags, "reflect");
+                return "reflect";
             }
 
             const res = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
@@ -333,12 +524,7 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
                 body: JSON.stringify({
                     contents: [{ role: "user", parts: [{ text: buildGeminiPrompt(description) }] }],
                     generationConfig: { temperature: 0.2, topP: 0.8 },
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                    ],
+                    safetySettings: GEMINI_SAFETY_SETTINGS,
                 }),
             });
 
@@ -353,15 +539,21 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
                 .join("\n")
                 .trim();
 
-            return parseGeminiCategory(text ?? "");
+            const candidate = parseGeminiCategory(text ?? "");
+            const refined = refineCategoryWithText(description, candidate);
+            if (refined) return refined;
+            const fallbackTags = extractTagsFromText(description);
+            if (fallbackTags.length > 0) return pickCategory(fallbackTags, "reflect");
+            return "reflect";
         },
         []
     );
 
-    const recommendedLabel = BOOK_CATEGORIES[finalCategoryKey]?.label ?? "Recommended resources";
-    const recommendedBooks = BOOK_CATEGORIES[finalCategoryKey]?.books ?? [];
-    const recommendedArticles = ARTICLE_CATEGORIES[finalCategoryKey]?.articles ?? [];
-    const recommendedVideos = VIDEO_CATEGORIES[finalCategoryKey]?.videos ?? [];
+    const recommendedResources = resourceCategories?.[finalCategoryKey];
+    const recommendedLabel = recommendedResources?.label ?? "Recommended resources";
+    const recommendedBooks = recommendedResources?.books ?? [];
+    const recommendedArticles = recommendedResources?.articles ?? [];
+    const recommendedVideos = recommendedResources?.videos ?? [];
 
     const handleSelectOption = useCallback(
         (opt: QuestionOption) => {
@@ -416,7 +608,7 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
                                 </View>
                                 {recommendedBooks.slice(0, 2).map((book) => (
                                     <BookCard
-                                        key={`${book.isbn13}-${book.title}`}
+                                        key={`${book.isbn13 ?? "noisbn"}-${book.title}`}
                                         title={book.title}
                                         author={book.author}
                                         isbn13={book.isbn13}
@@ -525,32 +717,51 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
                                             if (question?.id) {
                                                 setAnswerTags((prev) => ({ ...prev, [question.id]: [] }));
                                             }
+                                            setLastDescription(null);
                                             goTo(question.next ?? "END_GENERAL", flow);
                                             return;
                                         }
 
+                                        setLastDescription(trimmed);
                                         setIsAnalyzing(true);
-                                        try {
-                                            const aiMatch = await classifyDescription(trimmed);
-                                            if (aiMatch) {
-                                                setAiCategory(aiMatch);
-                                                setAiStatus("matched");
-                                            } else {
-                                                setAiCategory(null);
-                                                setAiStatus("unmatched");
-                                            }
-                                        } catch {
-                                            const fallbackTags = extractTagsFromText(trimmed);
-                                            if (fallbackTags.length > 0) {
-                                                setAiCategory(fallbackTags[0]);
-                                                setAiStatus("matched");
-                                            } else {
-                                                setAiCategory(null);
-                                                setAiStatus("unmatched");
-                                            }
-                                        } finally {
-                                            setIsAnalyzing(false);
-                                        }
+        try {
+            const aiMatch = await classifyDescription(trimmed);
+            if (aiMatch) {
+                setAiCategory(aiMatch);
+                setAiStatus("matched");
+            } else {
+                setAiCategory(null);
+                setAiStatus("unmatched");
+            }
+        } catch {
+            const fallbackTags = extractTagsFromText(trimmed);
+            if (fallbackTags.length > 0) {
+                setAiCategory(fallbackTags[0]);
+                setAiStatus("matched");
+            } else {
+                try {
+                    const groqText = await callGroqChat({
+                        messages: [{ role: "user", content: buildGeminiPrompt(trimmed) }],
+                        maxTokens: 64,
+                        temperature: 0.2,
+                    });
+                    const candidate = parseGeminiCategory(groqText ?? "");
+                    const refined = refineCategoryWithText(trimmed, candidate);
+                    if (refined) {
+                        setAiCategory(refined);
+                        setAiStatus("matched");
+                    } else {
+                        setAiCategory(null);
+                        setAiStatus("unmatched");
+                    }
+                } catch {
+                    setAiCategory(null);
+                    setAiStatus("unmatched");
+                }
+            }
+        } finally {
+            setIsAnalyzing(false);
+        }
 
                                         if (question?.id) {
                                             setAnswerTags((prev) => ({
@@ -579,6 +790,7 @@ const QuestionScreen = React.forwardRef<QuestionScreenHandle, Props>(
                                             }
                                             setAiCategory(null);
                                             setAiStatus("idle");
+                                            setLastDescription(null);
                                             goTo(question.next ?? "END_GENERAL", flow);
                                         }}
                                     >

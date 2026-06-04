@@ -84,6 +84,26 @@ export const chatStyles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
   },
+  metaRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sourcePill: {
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  sourceText: {
+    color: "rgba(248,250,252,0.8)",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+  },
   thinking: {
     fontStyle: "italic",
     color: "rgba(248,250,252,0.8)",
